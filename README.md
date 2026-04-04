@@ -30,16 +30,8 @@ This project demonstrates how to build a custom Cowork connector using the `moca
 
 - Java 24
 - Maven 3.6+
-- The `mocapi` library installed to your local Maven repository (see below)
 
-## Building Mocapi Locally
-
-This project depends on `mocapi` at version `0.0.1-SNAPSHOT`. If you haven't already, build and install it:
-
-```bash
-cd ~/IdeaProjects/mocapi
-mvn install -DskipTests
-```
+All dependencies, including `mocapi`, are available on Maven Central — no local builds required.
 
 ## Configuration
 
