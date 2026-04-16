@@ -1,4 +1,4 @@
-package com.callibrity.cowork.connector.catalog.tool;
+package com.callibrity.cowork.connector.catalog.service;
 
 import com.callibrity.cowork.connector.catalog.domain.Dependency;
 import com.callibrity.cowork.connector.catalog.domain.LifecycleStage;
@@ -15,9 +15,6 @@ import com.callibrity.cowork.connector.catalog.dto.TeamSummaryDto;
 import com.callibrity.cowork.connector.catalog.repository.DependencyRepository;
 import com.callibrity.cowork.connector.catalog.repository.ServiceRepository;
 import com.callibrity.cowork.connector.catalog.repository.TeamRepository;
-import com.callibrity.mocapi.api.tools.ToolMethod;
-import com.callibrity.mocapi.api.tools.ToolService;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -35,10 +32,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-@ToolService
 @Component
 @RequiredArgsConstructor
-public class CatalogTools {
+public class DefaultCatalogService implements CatalogService {
 
     private static final int DEFAULT_PAGE_SIZE = 20;
     private static final int MAX_PAGE_SIZE = 100;
@@ -47,20 +43,16 @@ public class CatalogTools {
     private final TeamRepository teamRepo;
     private final DependencyRepository dependencyRepo;
 
-    @ToolMethod(name = "service-lookup", title = "Service Lookup",
-            description = "Fetch a single service by its short name, including owner team, tags, lifecycle, and runbook links.")
-    public ServiceDto serviceLookup(
-            @Schema(description = "Short name of the service, e.g. 'payment-processor'") String name) {
+    @Override
+    public ServiceDto lookupService(String name) {
         Service service = requireService(name);
         int directDeps = dependencyRepo.findAllByFromService(service).size();
         int directDependents = dependencyRepo.findAllByToService(service).size();
         return toServiceDto(service, directDeps, directDependents);
     }
 
-    @ToolMethod(name = "team-lookup", title = "Team Lookup",
-            description = "Fetch a team by its short name, including on-call rotation and Slack channel.")
-    public TeamDto teamLookup(
-            @Schema(description = "Short name of the team, e.g. 'platform'") String name) {
+    @Override
+    public TeamDto lookupTeam(String name) {
         Team team = teamRepo.findByName(name).orElseThrow(() ->
                 new IllegalArgumentException("Unknown team: " + name));
         long serviceCount = serviceRepo.findAllByOwnerName(team.getName()).size();
@@ -68,59 +60,41 @@ public class CatalogTools {
                 team.getSlackChannel(), serviceCount);
     }
 
-    @ToolMethod(name = "services-list", title = "Services List",
-            description = "Paginated list of services, optionally filtered by domain, tag, and lifecycle stage.")
-    public PageDto<ServiceSummaryDto> servicesList(
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Filter by business domain (e.g. 'checkout'). Omit for all domains.") String domain,
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Filter by tag (e.g. 'pii', 'pci', 'soc2-scope'). Omit for all tags.") String tag,
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Filter by lifecycle stage: ACTIVE, DEPRECATED, RETIRING. Omit for all.") LifecycleStage lifecycle,
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Zero-based page index. Defaults to 0.") Integer pageIndex,
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Page size. Defaults to 20, capped at 100.") Integer pageSize) {
+    @Override
+    public PageDto<ServiceSummaryDto> listServices(String domain, String tag, LifecycleStage lifecycle,
+                                                   Integer pageIndex, Integer pageSize) {
         Pageable pageable = pageable(pageIndex, pageSize, Sort.by("name"));
         return Pages.pageDtoOf(
                 serviceRepo.search(blankToNull(domain), lifecycle, blankToNull(tag), pageable)
                         .map(this::toServiceSummary));
     }
 
-    @ToolMethod(name = "teams-list", title = "Teams List",
-            description = "Paginated list of all teams with the number of services each one owns.")
-    public PageDto<TeamSummaryDto> teamsList(
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Zero-based page index. Defaults to 0.") Integer pageIndex,
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Page size. Defaults to 20, capped at 100.") Integer pageSize) {
+    @Override
+    public PageDto<TeamSummaryDto> listTeams(Integer pageIndex, Integer pageSize) {
         Pageable pageable = pageable(pageIndex, pageSize, Sort.by("name"));
         return Pages.pageDtoOf(teamRepo.findAll(pageable).map(this::toTeamSummary));
     }
 
-    @ToolMethod(name = "service-dependencies", title = "Service Dependencies",
-            description = "Services that the given service depends on. Set transitive=true for the full downstream tree.")
-    public RelatedServicesDto serviceDependencies(
-            @Schema(description = "Short name of the service") String name,
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "If true, follow dependency edges recursively. Defaults to false.") Boolean transitive) {
+    @Override
+    public RelatedServicesDto serviceDependencies(String name, boolean transitive) {
         Service start = requireService(name);
-        boolean recursive = Boolean.TRUE.equals(transitive);
-        List<ServiceSummaryDto> services = traverse(start, recursive,
+        List<ServiceSummaryDto> services = traverse(start, transitive,
                 s -> dependencyRepo.findAllByFromService(s),
                 Dependency::getToService).stream().map(this::toServiceSummary).toList();
-        return new RelatedServicesDto(start.getName(), recursive, services);
+        return new RelatedServicesDto(start.getName(), transitive, services);
     }
 
-    @ToolMethod(name = "service-dependents", title = "Service Dependents",
-            description = "Services that depend on the given service. Set transitive=true for the full upstream caller tree.")
-    public RelatedServicesDto serviceDependents(
-            @Schema(description = "Short name of the service") String name,
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "If true, follow dependent edges recursively. Defaults to false.") Boolean transitive) {
+    @Override
+    public RelatedServicesDto serviceDependents(String name, boolean transitive) {
         Service start = requireService(name);
-        boolean recursive = Boolean.TRUE.equals(transitive);
-        List<ServiceSummaryDto> services = traverse(start, recursive,
+        List<ServiceSummaryDto> services = traverse(start, transitive,
                 s -> dependencyRepo.findAllByToService(s),
                 Dependency::getFromService).stream().map(this::toServiceSummary).toList();
-        return new RelatedServicesDto(start.getName(), recursive, services);
+        return new RelatedServicesDto(start.getName(), transitive, services);
     }
 
-    @ToolMethod(name = "blast-radius", title = "Blast Radius",
-            description = "If this service fails, which services are transitively impacted and which teams would be paged?")
-    public BlastRadiusDto blastRadius(
-            @Schema(description = "Short name of the service whose failure is being assessed") String name) {
+    @Override
+    public BlastRadiusDto blastRadius(String name) {
         Service target = requireService(name);
         List<Service> impacted = traverse(target, true,
                 s -> dependencyRepo.findAllByToService(s),
@@ -155,20 +129,14 @@ public class CatalogTools {
                 orphans);
     }
 
-    @ToolMethod(name = "orphaned-services", title = "Orphaned Services",
-            description = "Services with no owning team. Ownership gaps are the 'who do we page?' question nobody wants to answer at 2 a.m.")
-    public PageDto<ServiceSummaryDto> orphanedServices(
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Zero-based page index. Defaults to 0.") Integer pageIndex,
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Page size. Defaults to 20, capped at 100.") Integer pageSize) {
+    @Override
+    public PageDto<ServiceSummaryDto> orphanedServices(Integer pageIndex, Integer pageSize) {
         Pageable pageable = pageable(pageIndex, pageSize, Sort.by("name"));
         return Pages.pageDtoOf(serviceRepo.findAllByOwnerIsNull(pageable).map(this::toServiceSummary));
     }
 
-    @ToolMethod(name = "deprecated-in-use", title = "Deprecated Services Still In Use",
-            description = "Deprecated services that something still depends on — the migration backlog the LLM can summarize.")
-    public PageDto<DeprecatedUsageDto> deprecatedInUse(
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Zero-based page index. Defaults to 0.") Integer pageIndex,
-            @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Page size. Defaults to 20, capped at 100.") Integer pageSize) {
+    @Override
+    public PageDto<DeprecatedUsageDto> deprecatedInUse(Integer pageIndex, Integer pageSize) {
         Pageable pageable = pageable(pageIndex, pageSize, Sort.by("name"));
         return Pages.pageDtoOf(serviceRepo.findDeprecatedInUse(pageable).map(svc -> {
             List<ServiceSummaryDto> callers = dependencyRepo.findAllByToService(svc).stream()
@@ -242,7 +210,7 @@ public class CatalogTools {
 
     private static Pageable pageable(Integer pageIndex, Integer pageSize, Sort sort) {
         int idx = pageIndex == null || pageIndex < 0 ? 0 : pageIndex;
-        int size = pageSize == null ? DEFAULT_PAGE_SIZE : Math.min(Math.max(pageSize, 1), MAX_PAGE_SIZE);
+        int size = pageSize == null ? DEFAULT_PAGE_SIZE : Math.clamp(pageSize, 1, MAX_PAGE_SIZE);
         return PageRequest.of(idx, size, sort);
     }
 
