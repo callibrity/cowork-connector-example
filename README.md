@@ -11,17 +11,7 @@ The demo ships with a seeded 36-service / 8-team catalog modeled on a mid-size f
 
 ## Meet Meridian
 
-Meridian is a mid-size fictitious e-commerce platform. Eight engineering teams; thirty-six services across eight business domains; roughly eighty-six in-production dependencies. The catalog is loaded into H2 on startup from [`CatalogSeeder`](src/main/java/com/callibrity/cowork/connector/catalog/seed/CatalogSeeder.java) and thrown away when the process exits. Nothing about the data is fetched from an external system — the seed deliberately includes the kinds of patterns (deprecated services still in use, a compliance-scoped orphan, a naming-drift cluster, a retiring service that still carries traffic) that exist in most real service catalogs, so the tool-orchestrated answers stay non-trivial.
-
-### Domain model
-
-Three entities, with UUID primary keys via `jpa-utils`' `BaseEntity`:
-
-- **`Service`** — name, display name, description, business domain, owner `Team` (nullable — a deliberately orphaned service is part of the demo), `LifecycleStage` (`ACTIVE` / `DEPRECATED` / `RETIRING`), repo URL, runbook URL, and a free-form tag set (`pii`, `pci`, `soc2-scope`, `customer-facing`, `foundation`, `gdpr`).
-- **`Team`** — name, display name, on-call rotation handle, primary Slack channel.
-- **`Dependency`** — directed edge from one `Service` to another, plus a `DependencyType` (`CALLS`, `READS_FROM`, `PUBLISHES_TO`, `CONSUMES_FROM`).
-
-DTOs in [`catalog/dto/`](src/main/java/com/callibrity/cowork/connector/catalog/dto/) are the wire shape — entities never leak into tool or service responses.
+Meridian is a mid-size fictitious e-commerce platform. Eight engineering teams; thirty-six services across eight business domains; roughly eighty-six in-production dependencies. The catalog is deliberately shaped around patterns every real service catalog has — deprecated services still in use, a compliance-scoped orphan, a naming-drift cluster, a retiring service that still carries traffic — so the tool-orchestrated answers stay concrete rather than academic.
 
 ### The eight teams
 
@@ -52,35 +42,7 @@ The seed data is shaped around five specific patterns every enterprise engineeri
 
 The tool surface is generic — you can point this connector at your real CMDB export, Backstage catalog, or any service-inventory system and every query still works. The seeded Meridian data exists because a demo answering catalog queries against pristine, well-owned, perfectly-documented services isn't a useful demo. Real service catalogs have a naming-drift cluster, a compliance-scoped orphan, a deprecated service nobody's migrated off. Compressing those shapes into 36 services gives the LLM something substantive to reason over — the answers are concrete and the dysfunctions are the kind you'd actually want surfaced from your own catalog.
 
-## Not production-ready
-
-This is a reference example meant to illustrate how an MCP connector is put together, not a template you can deploy as-is. In particular: **there is no authentication** — the `/mcp` endpoint is open to any caller. A production MCP server for Claude Cowork should sit behind one of:
-
-- An OAuth2 resource server validating JWTs from your IdP (Auth0, Microsoft Entra, Okta, etc.) via `spring-boot-starter-oauth2-resource-server`.
-- A reverse proxy or API gateway that handles authentication + TLS termination.
-- A service mesh enforcing mTLS between Cowork and the connector.
-
-Earlier revisions of this example carried a working `spring-boot-starter-oauth2-resource-server` configuration; it was removed to keep the catalog-demo focus sharp. If you're evaluating this for production, the Mocapi docs and any recent Spring Boot 4 OAuth2 resource-server tutorial will walk you through wiring it back in.
-
-## Tools
-
-Nine read-only tools, all returning structured DTOs that Mocapi publishes via auto-generated JSON Schema:
-
-| Tool | Returns | Purpose |
-|---|---|---|
-| `service-lookup` | `ServiceDto` | Full service record — owner team, tags, lifecycle, runbook links |
-| `team-lookup` | `TeamDto` | Team record with on-call rotation, Slack channel, service count |
-| `services-list` | `PageDto<ServiceSummaryDto>` | Paginated list with filters for domain, tag, and lifecycle stage |
-| `teams-list` | `PageDto<TeamSummaryDto>` | Paginated list of teams with service counts |
-| `service-dependencies` | `List<ServiceSummaryDto>` | Outbound deps (direct or transitive) |
-| `service-dependents` | `List<ServiceSummaryDto>` | Inbound callers (direct or transitive) |
-| `blast-radius` | `BlastRadiusDto` | Transitively-impacted services grouped by owning team — "who gets paged if this breaks" |
-| `orphaned-services` | `PageDto<ServiceSummaryDto>` | Services with no owner |
-| `deprecated-in-use` | `PageDto<DeprecatedUsageDto>` | Deprecated services still called by something |
-
-Pagination returns `PaginationDto` metadata (`totalElementCount`, `hasNext`, etc.) so the LLM knows when to page further without being told.
-
-## Example questions
+## What you can ask Claude
 
 The demo is at its best when the question sounds like one a real staff engineer, engineering manager, or compliance lead would ask out loud. The LLM composes answers by orchestrating multiple tool calls over the seeded catalog; because the seed includes real-shaped dysfunctions, the answers stay concrete and actionable rather than academic.
 
@@ -112,6 +74,34 @@ The demo is at its best when the question sounds like one a real staff engineer,
 - *"If we want to extract identity into its own platform, what's the dependency contract we'd need?"* → every caller of every identity-owned service, plus what those identity services themselves depend on.
 - *"Find us any services that look like they were orphaned when someone left."* → exactly what `legacy-invoicing`'s seeded description says happened.
 
+## Not production-ready
+
+This is a reference example meant to illustrate how an MCP connector is put together, not a template you can deploy as-is. In particular: **there is no authentication** — the `/mcp` endpoint is open to any caller. A production MCP server for Claude Cowork should sit behind one of:
+
+- An OAuth2 resource server validating JWTs from your IdP (Auth0, Microsoft Entra, Okta, etc.) via `spring-boot-starter-oauth2-resource-server`.
+- A reverse proxy or API gateway that handles authentication + TLS termination.
+- A service mesh enforcing mTLS between Cowork and the connector.
+
+Earlier revisions of this example carried a working `spring-boot-starter-oauth2-resource-server` configuration; it was removed to keep the catalog-demo focus sharp. If you're evaluating this for production, the Mocapi docs and any recent Spring Boot 4 OAuth2 resource-server tutorial will walk you through wiring it back in.
+
+## Tools
+
+Nine read-only tools, all returning structured DTOs that Mocapi publishes via auto-generated JSON Schema:
+
+| Tool | Returns | Purpose |
+|---|---|---|
+| `service-lookup` | `ServiceDto` | Full service record — owner team, tags, lifecycle, runbook links |
+| `team-lookup` | `TeamDto` | Team record with on-call rotation, Slack channel, service count |
+| `services-list` | `PageDto<ServiceSummaryDto>` | Paginated list with filters for domain, tag, and lifecycle stage |
+| `teams-list` | `PageDto<TeamSummaryDto>` | Paginated list of teams with service counts |
+| `service-dependencies` | `List<ServiceSummaryDto>` | Outbound deps (direct or transitive) |
+| `service-dependents` | `List<ServiceSummaryDto>` | Inbound callers (direct or transitive) |
+| `blast-radius` | `BlastRadiusDto` | Transitively-impacted services grouped by owning team — "who gets paged if this breaks" |
+| `orphaned-services` | `PageDto<ServiceSummaryDto>` | Services with no owner |
+| `deprecated-in-use` | `PageDto<DeprecatedUsageDto>` | Deprecated services still called by something |
+
+Pagination returns `PaginationDto` metadata (`totalElementCount`, `hasNext`, etc.) so the LLM knows when to page further without being told.
+
 ## Architecture
 
 - **Spring Boot 4.0.5** — web server, DI, AOT processing
@@ -120,6 +110,16 @@ The demo is at its best when the question sounds like one a real staff engineer,
 - **Spring Data JPA + H2** — catalog persistence. The H2 tables are seeded in-memory on each startup; swap in Postgres by changing one dep
 - **jpa-utils 0.0.12** — `BaseEntity` (UUID + `@Version`), framework-agnostic `PageDto<T>` for paginated tool returns
 - **GraalVM native-image** — the chain ships clean reachability metadata end-to-end: Mocapi, Substrate, Odyssey, and Ripcurl each ship their own `RuntimeHintsRegistrar`. This repo carries **zero** native-image-specific code; dropping `spring-boot-starter-data-jpa` or adding another MCP tool doesn't require touching hint files.
+
+### Data model
+
+Three entities, with UUID primary keys via `jpa-utils`' `BaseEntity`:
+
+- **`Service`** — name, display name, description, business domain, owner `Team` (nullable — a deliberately orphaned service is part of the demo), `LifecycleStage` (`ACTIVE` / `DEPRECATED` / `RETIRING`), repo URL, runbook URL, and a free-form tag set (`pii`, `pci`, `soc2-scope`, `customer-facing`, `foundation`, `gdpr`).
+- **`Team`** — name, display name, on-call rotation handle, primary Slack channel.
+- **`Dependency`** — directed edge from one `Service` to another, plus a `DependencyType` (`CALLS`, `READS_FROM`, `PUBLISHES_TO`, `CONSUMES_FROM`).
+
+The catalog is loaded into H2 on startup from [`CatalogSeeder`](src/main/java/com/callibrity/cowork/connector/catalog/seed/CatalogSeeder.java) and thrown away when the process exits. DTOs in [`catalog/dto/`](src/main/java/com/callibrity/cowork/connector/catalog/dto/) are the wire shape — entities never leak into tool or service responses.
 
 ## Performance
 
@@ -178,17 +178,6 @@ ngrok's free tier inspects traffic at `http://localhost:4040`, which is useful f
 ### Connecting from Cowork
 
 Configure a custom connector in Cowork pointing at your ngrok URL (or your real deployment's URL). The server is unauthenticated in this demo — see [Not production-ready](#not-production-ready) above before pointing any non-demo Cowork workspace at it.
-
-## Exploring the catalog
-
-A few example tool calls the LLM might make:
-
-- `services-list` with `tag=pii` → 13 services across identity, checkout, fulfillment, and notifications
-- `orphaned-services` → `legacy-invoicing` (deprecated, PCI- and SOC2-scoped, no owner)
-- `deprecated-in-use` → `reporting-legacy` still called by `payment-processor`, `analytics-ingester`, and `legacy-invoicing`; `cart-v1` still called by `partner-gateway`
-- `blast-radius` for `auth-service` → 17 services across 6 teams + 1 orphan with no on-call rotation
-
-The full MCP handshake (`initialize` → `notifications/initialized` → `tools/call`) is handled by any MCP client — Cowork, Claude Desktop, MCP Inspector.
 
 ## CI / Release
 
