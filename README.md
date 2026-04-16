@@ -9,6 +9,16 @@ A Claude Cowork connector built with Spring Boot 4 and [Mocapi](https://github.c
 
 The demo ships with a seeded 36-service / 8-team catalog modeled on a mid-size fictitious company ("Meridian"). The data is intentionally messy — a deprecated service with three active callers, an orphaned service that still holds PCI-scoped data, a naming-drift cluster (`reports-v2`, `reports-v2-new`, `reporting-legacy`), cross-team dependency chains. The answers resonate because the messiness is real.
 
+## Not production-ready
+
+This is a reference example meant to illustrate how an MCP connector is put together, not a template you can deploy as-is. In particular: **there is no authentication** — the `/mcp` endpoint is open to any caller. A production MCP server for Claude Cowork should sit behind one of:
+
+- An OAuth2 resource server validating JWTs from your IdP (Auth0, Microsoft Entra, Okta, etc.) via `spring-boot-starter-oauth2-resource-server`.
+- A reverse proxy or API gateway that handles authentication + TLS termination.
+- A service mesh enforcing mTLS between Cowork and the connector.
+
+Earlier revisions of this example carried a working `spring-boot-starter-oauth2-resource-server` configuration; it was removed to keep the catalog-demo focus sharp. If you're evaluating this for production, the Mocapi docs and any recent Spring Boot 4 OAuth2 resource-server tutorial will walk you through wiring it back in.
+
 ## Tools
 
 Nine read-only tools, all returning structured DTOs that Mocapi publishes via auto-generated JSON Schema:
@@ -78,9 +88,21 @@ docker run --rm -p 8080:8080 \
 
 The first build takes a few minutes (Paketo downloads the native-image builder); cached rebuilds are ~60–90 seconds.
 
+### Exposing the local server to Cowork via ngrok
+
+Cowork connectors need a public HTTPS URL — `localhost:8080` isn't reachable from Claude's servers. For local demos, [ngrok](https://ngrok.com/download) tunnels your laptop to a public endpoint:
+
+```
+ngrok http 8080
+```
+
+ngrok prints a `https://<random>.ngrok-free.app` URL. Point Cowork at `https://<random>.ngrok-free.app/mcp`.
+
+ngrok's free tier inspects traffic at `http://localhost:4040`, which is useful for watching the MCP handshake and tool calls in real time while the demo is running. A fresh free-tier URL is issued each time you restart ngrok; paid plans give you a stable subdomain if you want to save the connector configuration in Cowork.
+
 ### Connecting from Cowork
 
-Point your Cowork connector at `http://your-host:8080/mcp`. The server is unauthenticated in this demo — in production you'd put it behind your own resource server, reverse proxy, or service mesh.
+Configure a custom connector in Cowork pointing at your ngrok URL (or your real deployment's URL). The server is unauthenticated in this demo — see [Not production-ready](#not-production-ready) above before pointing any non-demo Cowork workspace at it.
 
 ## Exploring the catalog
 
