@@ -72,11 +72,11 @@ The demo is at its best when the question sounds like one a real staff engineer,
 ## Architecture
 
 - **Spring Boot 4.0.5** — web server, DI, AOT processing
-- **Mocapi 0.4.0** — `@ToolService` / `@ToolMethod` bean discovery, streamable-HTTP MCP transport, JSON Schema generation from method signatures
+- **Mocapi 0.4.1** — `@ToolService` / `@ToolMethod` bean discovery, streamable-HTTP MCP transport, JSON Schema generation from method signatures. Bundles native-image hints for every type it owns plus the `json-sKema` meta-schemas it uses for tool input validation.
 - **Substrate 0.7.0** — in-memory atom store for MCP session persistence (swap in `substrate-redis` for clustered deployments)
 - **Spring Data JPA + H2** — catalog persistence. The H2 tables are seeded in-memory on each startup; swap in Postgres by changing one dep
 - **jpa-utils 0.0.12** — `BaseEntity` (UUID + `@Version`), framework-agnostic `PageDto<T>` for paginated tool returns
-- **GraalVM native-image** — the chain ships clean reachability metadata: Mocapi, Substrate, Odyssey, and Ripcurl each ship their own `RuntimeHintsRegistrar`. One app-local hint in `CoworkConnectorApplication` covers `json-sKema`'s meta-schema resources; that hint will move into Mocapi in a later release.
+- **GraalVM native-image** — the chain ships clean reachability metadata end-to-end: Mocapi, Substrate, Odyssey, and Ripcurl each ship their own `RuntimeHintsRegistrar`. This repo carries **zero** native-image-specific code; dropping `spring-boot-starter-data-jpa` or adding another MCP tool doesn't require touching hint files.
 
 ## Performance
 
