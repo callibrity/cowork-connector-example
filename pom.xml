@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.3</version>
+        <version>4.0.5</version>
     </parent>
 
     <groupId>com.callibrity.cowork</groupId>
@@ -16,8 +16,10 @@
     <description>Example MCP connector for Claude Cowork, built with Spring Boot and Mocapi</description>
 
     <properties>
-        <java.version>24</java.version>
-        <mocapi.version>0.0.4</mocapi.version>
+        <java.version>25</java.version>
+        <mocapi.version>0.4.0</mocapi.version>
+        <substrate.version>0.7.0</substrate.version>
+        <jpa-utils.version>0.0.12</jpa-utils.version>
         <swagger-annotations.version>2.2.20</swagger-annotations.version>
     </properties>
 
@@ -33,9 +35,27 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+        <!-- Data layer -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jwcarman.jpa</groupId>
+            <artifactId>jpa-utils</artifactId>
+            <version>${jpa-utils.version}</version>
+        </dependency>
         <!-- Mocapi -->
         <dependency>
             <groupId>com.callibrity.mocapi</groupId>
@@ -43,14 +63,9 @@
             <version>${mocapi.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.callibrity.mocapi</groupId>
-            <artifactId>mocapi-tools</artifactId>
-            <version>${mocapi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.callibrity.mocapi</groupId>
-            <artifactId>mocapi-prompts</artifactId>
-            <version>${mocapi.version}</version>
+            <groupId>org.jwcarman.substrate</groupId>
+            <artifactId>substrate-core</artifactId>
+            <version>${substrate.version}</version>
         </dependency>
 
         <!-- Swagger annotations for parameter descriptions -->
@@ -65,12 +80,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
-        </dependency>
-
-        <!-- Logging -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
         </dependency>
 
         <!-- Test -->
@@ -94,6 +103,17 @@
                         </exclude>
                     </excludes>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -116,4 +136,18 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
