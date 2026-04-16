@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-16
+
+### Fixed
+
+- `service-dependencies` and `service-dependents` now return a typed `RelatedServicesDto` object (fields: `rootService`, `transitive`, `services`) instead of a bare `List<ServiceSummaryDto>`. Mocapi's schema generator emits an object schema with properly-typed items; MCP clients receive the result in `structuredContent` where they previously saw a bare-array schema that caused validation errors in Cowork.
+
+### Changed
+
+- Bump mocapi to 0.4.1, which bundles native-image hints for `json-sKema`'s draft meta-schemas. Removed the temporary `AppHints` `RuntimeHintsRegistrar` from `CoworkConnectorApplication` — the app now ships with no native-image-specific code.
+- Expanded the README with an "Example questions" section showing the compliance, migration, incident, onboarding, and architectural questions the demo is designed to answer.
+
 ## [0.1.0] - 2026-04-16
 
 ### Added
@@ -21,5 +32,6 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.2.0
 [0.1.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.1.0
