@@ -11,7 +11,7 @@ The demo ships with a seeded 36-service / 8-team catalog modeled on a mid-size f
 
 ## Meet Meridian
 
-Meridian is a mid-size fictitious e-commerce platform. Eight engineering teams; thirty-six services across eight business domains; roughly eighty-six in-production dependencies. The catalog is loaded into H2 on startup from [`CatalogSeeder`](src/main/java/com/callibrity/cowork/connector/catalog/seed/CatalogSeeder.java) and thrown away when the process exits. Nothing about the data is fetched from an external system — the whole point is that the seeded graph is deliberately shaped to produce answers clients recognize.
+Meridian is a mid-size fictitious e-commerce platform. Eight engineering teams; thirty-six services across eight business domains; roughly eighty-six in-production dependencies. The catalog is loaded into H2 on startup from [`CatalogSeeder`](src/main/java/com/callibrity/cowork/connector/catalog/seed/CatalogSeeder.java) and thrown away when the process exits. Nothing about the data is fetched from an external system — the seed deliberately includes the kinds of patterns (deprecated services still in use, a compliance-scoped orphan, a naming-drift cluster, a retiring service that still carries traffic) that exist in most real service catalogs, so the tool-orchestrated answers stay non-trivial.
 
 ### Domain model
 
@@ -48,9 +48,9 @@ The seed data is shaped around five specific patterns every enterprise engineeri
 
 5. **The foundational blast radius.** `auth-service` has **17 transitively-impacted dependents across 6 teams**, plus the `legacy-invoicing` orphan. `kafka-gateway`, `feature-flags`, and `events-bus` are similarly load-bearing. Drives `blast-radius` queries and the "which services deserve the strongest SLO" conversation.
 
-### Why it resonates
+### Why the seed looks like this
 
-You can re-point the demo at your real CMDB export or Backstage catalog and every query still makes sense — the tool surface is generic. But the **seeded** data exists to trigger the moment where a viewer says "wait, that's us." The naming-drift cluster, the PCI-scoped orphan, the deprecated service nobody's migrated off — those aren't academic examples. They're real shapes, compressed into 36 services.
+The tool surface is generic — you can point this connector at your real CMDB export, Backstage catalog, or any service-inventory system and every query still works. The seeded Meridian data exists because a demo answering catalog queries against pristine, well-owned, perfectly-documented services isn't a useful demo. Real service catalogs have a naming-drift cluster, a compliance-scoped orphan, a deprecated service nobody's migrated off. Compressing those shapes into 36 services gives the LLM something substantive to reason over — the answers are concrete and the dysfunctions are the kind you'd actually want surfaced from your own catalog.
 
 ## Not production-ready
 
@@ -82,7 +82,7 @@ Pagination returns `PaginationDto` metadata (`totalElementCount`, `hasNext`, etc
 
 ## Example questions
 
-The demo is at its best when the question sounds like one a real staff engineer, engineering manager, or compliance lead would ask out loud. The LLM composes answers by orchestrating multiple tool calls over the seeded catalog; the seeded data has specific, recognizable dysfunctions baked in so the answers read like something from the viewer's own org.
+The demo is at its best when the question sounds like one a real staff engineer, engineering manager, or compliance lead would ask out loud. The LLM composes answers by orchestrating multiple tool calls over the seeded catalog; because the seed includes real-shaped dysfunctions, the answers stay concrete and actionable rather than academic.
 
 ### Compliance / risk
 
