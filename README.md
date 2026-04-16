@@ -37,6 +37,38 @@ Nine read-only tools, all returning structured DTOs that Mocapi publishes via au
 
 Pagination returns `PaginationDto` metadata (`totalElementCount`, `hasNext`, etc.) so the LLM knows when to page further without being told.
 
+## Example questions
+
+The demo is at its best when the question sounds like one a real staff engineer, engineering manager, or compliance lead would ask out loud. The LLM composes answers by orchestrating multiple tool calls over the seeded catalog; the seeded data has specific, recognizable dysfunctions baked in so the answers read like something from the viewer's own org.
+
+### Compliance / risk
+
+- *"Do we have any compliance-scoped services that nobody owns?"* → surfaces `legacy-invoicing` (PCI + SOC2, deprecated, no team assigned).
+- *"Map our PII footprint. Which teams carry the most of it?"* → returns 13 services, heavily concentrated in identity and checkout.
+- *"If an auditor asks which services touch PCI data, what's the answer?"* → a two-service list, one of which is an unowned deprecated service — which is the interesting part.
+
+### Migration backlog
+
+- *"What's our migration backlog? Which deprecated services are still in use, and who needs to stop calling them?"* → `reporting-legacy` called by `payment-processor`, `analytics-ingester`, and `legacy-invoicing`; `cart-v1` called by `partner-gateway` and `legacy-invoicing`.
+- *"We have `reports-v2`, `reports-v2-new`, and `reporting-legacy`. Which one should a new service use?"* → the LLM can reason about lifecycle state, caller counts, and naming signals.
+
+### Incident prep / blast radius
+
+- *"If `auth-service` goes down, what breaks and who gets paged?"* → 17 impacted services across 6 teams, plus one orphan with no on-call rotation.
+- *"We're planning a 30-minute `payment-processor` maintenance window. Draft the customer-comm and internal-announcement copy."* → blast radius plus affected customer-facing features.
+- *"What are our most load-bearing services — the ones whose failure would page the most teams?"* → iterative `service-dependents` calls; `auth-service`, `kafka-gateway`, and `events-bus` bubble to the top.
+
+### Onboarding / ramp-up
+
+- *"I just joined the checkout team. What do we own, what do we depend on, and what depends on us?"* → full picture in one prompt — owned services, outbound deps, inbound callers, runbook links.
+- *"What's the platform team's surface area? How many other teams depend on them?"* → all seven other teams depend on at least one platform service.
+
+### Architecture / change impact
+
+- *"Map the end-to-end flow from cart to shipping notification."* → transitive dependency walk from `order-coordinator` through payment, inventory, shipping, and email-dispatcher.
+- *"If we want to extract identity into its own platform, what's the dependency contract we'd need?"* → every caller of every identity-owned service, plus what those identity services themselves depend on.
+- *"Find us any services that look like they were orphaned when someone left."* → exactly what `legacy-invoicing`'s seeded description says happened.
+
 ## Architecture
 
 - **Spring Boot 4.0.5** — web server, DI, AOT processing
