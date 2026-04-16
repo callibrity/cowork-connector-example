@@ -6,6 +6,7 @@ import com.callibrity.cowork.connector.catalog.domain.Service;
 import com.callibrity.cowork.connector.catalog.domain.Team;
 import com.callibrity.cowork.connector.catalog.dto.BlastRadiusDto;
 import com.callibrity.cowork.connector.catalog.dto.DeprecatedUsageDto;
+import com.callibrity.cowork.connector.catalog.dto.RelatedServicesDto;
 import com.callibrity.cowork.connector.catalog.dto.ServiceDto;
 import com.callibrity.cowork.connector.catalog.dto.ServiceSummaryDto;
 import com.callibrity.cowork.connector.catalog.dto.TeamDto;
@@ -92,24 +93,28 @@ public class CatalogTools {
 
     @ToolMethod(name = "service-dependencies", title = "Service Dependencies",
             description = "Services that the given service depends on. Set transitive=true for the full downstream tree.")
-    public List<ServiceSummaryDto> serviceDependencies(
+    public RelatedServicesDto serviceDependencies(
             @Schema(description = "Short name of the service") String name,
             @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "If true, follow dependency edges recursively. Defaults to false.") Boolean transitive) {
         Service start = requireService(name);
-        return traverse(start, Boolean.TRUE.equals(transitive),
+        boolean recursive = Boolean.TRUE.equals(transitive);
+        List<ServiceSummaryDto> services = traverse(start, recursive,
                 s -> dependencyRepo.findAllByFromService(s),
                 Dependency::getToService).stream().map(this::toServiceSummary).toList();
+        return new RelatedServicesDto(start.getName(), recursive, services);
     }
 
     @ToolMethod(name = "service-dependents", title = "Service Dependents",
             description = "Services that depend on the given service. Set transitive=true for the full upstream caller tree.")
-    public List<ServiceSummaryDto> serviceDependents(
+    public RelatedServicesDto serviceDependents(
             @Schema(description = "Short name of the service") String name,
             @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "If true, follow dependent edges recursively. Defaults to false.") Boolean transitive) {
         Service start = requireService(name);
-        return traverse(start, Boolean.TRUE.equals(transitive),
+        boolean recursive = Boolean.TRUE.equals(transitive);
+        List<ServiceSummaryDto> services = traverse(start, recursive,
                 s -> dependencyRepo.findAllByToService(s),
                 Dependency::getFromService).stream().map(this::toServiceSummary).toList();
+        return new RelatedServicesDto(start.getName(), recursive, services);
     }
 
     @ToolMethod(name = "blast-radius", title = "Blast Radius",

@@ -13,6 +13,7 @@ import com.callibrity.cowork.connector.catalog.domain.Service;
 import com.callibrity.cowork.connector.catalog.domain.Team;
 import com.callibrity.cowork.connector.catalog.dto.BlastRadiusDto;
 import com.callibrity.cowork.connector.catalog.dto.DeprecatedUsageDto;
+import com.callibrity.cowork.connector.catalog.dto.RelatedServicesDto;
 import com.callibrity.cowork.connector.catalog.dto.ServiceDto;
 import com.callibrity.cowork.connector.catalog.dto.ServiceSummaryDto;
 import com.callibrity.cowork.connector.catalog.dto.TeamDto;
@@ -195,31 +196,34 @@ class CatalogToolsTest {
 
         @Test
         void directDependenciesReturnsImmediateChildren() {
-            List<ServiceSummaryDto> deps = tools.serviceDependencies("sso-broker", false);
-            assertThat(deps).extracting(ServiceSummaryDto::name)
+            RelatedServicesDto deps = tools.serviceDependencies("sso-broker", false);
+            assertThat(deps.rootService()).isEqualTo("sso-broker");
+            assertThat(deps.transitive()).isFalse();
+            assertThat(deps.services()).extracting(ServiceSummaryDto::name)
                     .containsExactlyInAnyOrder("accounts-api", "auth-service");
         }
 
         @Test
         void transitiveDependenciesReturnsFullDownstreamTree() {
-            List<ServiceSummaryDto> deps = tools.serviceDependencies("sso-broker", true);
+            RelatedServicesDto deps = tools.serviceDependencies("sso-broker", true);
             // sso-broker -> accounts-api -> auth-service, plus sso-broker -> auth-service
             // auth-service should appear once (dedup)
-            assertThat(deps).extracting(ServiceSummaryDto::name)
+            assertThat(deps.transitive()).isTrue();
+            assertThat(deps.services()).extracting(ServiceSummaryDto::name)
                     .containsExactlyInAnyOrder("accounts-api", "auth-service");
         }
 
         @Test
         void transitiveDependentsReturnsCallerTree() {
-            List<ServiceSummaryDto> callers = tools.serviceDependents("auth-service", true);
-            assertThat(callers).extracting(ServiceSummaryDto::name)
+            RelatedServicesDto callers = tools.serviceDependents("auth-service", true);
+            assertThat(callers.services()).extracting(ServiceSummaryDto::name)
                     .containsExactlyInAnyOrder("accounts-api", "sso-broker", "cart-service");
         }
 
         @Test
         void directDependentsOnlyReturnsImmediateCallers() {
-            List<ServiceSummaryDto> callers = tools.serviceDependents("auth-service", false);
-            assertThat(callers).extracting(ServiceSummaryDto::name)
+            RelatedServicesDto callers = tools.serviceDependents("auth-service", false);
+            assertThat(callers.services()).extracting(ServiceSummaryDto::name)
                     .containsExactlyInAnyOrder("accounts-api", "sso-broker", "cart-service");
         }
 
@@ -227,8 +231,8 @@ class CatalogToolsTest {
         void traversalHandlesCyclesWithoutInfiniteLoop() {
             // introduce a cycle: auth-service -> accounts-api -> auth-service
             addEdge("auth-service", "accounts-api", DependencyType.CALLS);
-            List<ServiceSummaryDto> deps = tools.serviceDependencies("auth-service", true);
-            assertThat(deps).extracting(ServiceSummaryDto::name)
+            RelatedServicesDto deps = tools.serviceDependencies("auth-service", true);
+            assertThat(deps.services()).extracting(ServiceSummaryDto::name)
                     .containsExactly("accounts-api");
         }
     }
