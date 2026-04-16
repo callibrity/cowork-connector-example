@@ -13,6 +13,7 @@ import com.callibrity.cowork.connector.catalog.domain.Service;
 import com.callibrity.cowork.connector.catalog.domain.Team;
 import com.callibrity.cowork.connector.catalog.dto.BlastRadiusDto;
 import com.callibrity.cowork.connector.catalog.dto.DeprecatedUsageDto;
+import com.callibrity.cowork.connector.catalog.dto.ImpactedServiceDetail;
 import com.callibrity.cowork.connector.catalog.dto.RelatedServicesDto;
 import com.callibrity.cowork.connector.catalog.dto.ServiceDto;
 import com.callibrity.cowork.connector.catalog.dto.ServiceSummaryDto;
@@ -230,26 +231,31 @@ class DefaultCatalogServiceTest {
     class BlastRadius {
 
         @Test
-        void groupsImpactedServicesByOwningTeam() {
+        void flatImpactedRowsCarryOwnerAndOnCallInline() {
             BlastRadiusDto radius = catalog.blastRadius("auth-service");
-            assertThat(radius.target().name()).isEqualTo("auth-service");
-            assertThat(radius.impactedServices()).extracting(ServiceSummaryDto::name)
+            assertThat(radius.target()).isEqualTo("auth-service");
+            assertThat(radius.impactedServices()).extracting(ImpactedServiceDetail::name)
                     .containsExactlyInAnyOrder("accounts-api", "sso-broker", "cart-service");
-            assertThat(radius.teamsAffected())
-                    .extracting(t -> t.team().name())
-                    .containsExactly("identity");
-            assertThat(radius.teamsAffected().getFirst().impactedServices())
-                    .extracting(ServiceSummaryDto::name)
-                    .containsExactlyInAnyOrder("accounts-api", "sso-broker");
+
+            ImpactedServiceDetail accounts = radius.impactedServices().stream()
+                    .filter(d -> d.name().equals("accounts-api"))
+                    .findFirst().orElseThrow();
+            assertThat(accounts.ownerTeam()).isEqualTo("identity");
+            assertThat(accounts.onCallRotation()).isEqualTo("pd://identity");
+            assertThat(accounts.slackChannel()).isEqualTo("#eng-identity");
         }
 
         @Test
-        void countsOrphanedServicesSeparately() {
+        void orphansReturnNullOwnerFieldsAndCountSeparately() {
             BlastRadiusDto radius = catalog.blastRadius("auth-service");
             assertThat(radius.orphanedImpactedCount()).isEqualTo(1);
-            assertThat(radius.teamsAffected())
-                    .flatExtracting(t -> t.impactedServices().stream().map(ServiceSummaryDto::name).toList())
-                    .doesNotContain("cart-service");
+
+            ImpactedServiceDetail cart = radius.impactedServices().stream()
+                    .filter(d -> d.name().equals("cart-service"))
+                    .findFirst().orElseThrow();
+            assertThat(cart.ownerTeam()).isNull();
+            assertThat(cart.onCallRotation()).isNull();
+            assertThat(cart.slackChannel()).isNull();
         }
     }
 

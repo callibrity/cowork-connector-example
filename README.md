@@ -7,7 +7,50 @@ A Claude Cowork connector built with Spring Boot 4 and [Mocapi](https://github.c
 - **What's our migration backlog?** Which deprecated services are still being called, and by whom?
 - **If we scale this team down, what are we on the hook for?**
 
-The demo ships with a seeded 36-service / 8-team catalog modeled on a mid-size fictitious company ("Meridian"). The data is intentionally messy — a deprecated service with three active callers, an orphaned service that still holds PCI-scoped data, a naming-drift cluster (`reports-v2`, `reports-v2-new`, `reporting-legacy`), cross-team dependency chains. The answers resonate because the messiness is real.
+The demo ships with a seeded 36-service / 8-team catalog modeled on a mid-size fictitious company ("Meridian"). The data is intentionally messy — the dysfunctions are the point.
+
+## Meet Meridian
+
+Meridian is a mid-size fictitious e-commerce platform. Eight engineering teams; thirty-six services across eight business domains; roughly eighty-six in-production dependencies. The catalog is loaded into H2 on startup from [`CatalogSeeder`](src/main/java/com/callibrity/cowork/connector/catalog/seed/CatalogSeeder.java) and thrown away when the process exits. Nothing about the data is fetched from an external system — the whole point is that the seeded graph is deliberately shaped to produce answers clients recognize.
+
+### Domain model
+
+Three entities, with UUID primary keys via `jpa-utils`' `BaseEntity`:
+
+- **`Service`** — name, display name, description, business domain, owner `Team` (nullable — a deliberately orphaned service is part of the demo), `LifecycleStage` (`ACTIVE` / `DEPRECATED` / `RETIRING`), repo URL, runbook URL, and a free-form tag set (`pii`, `pci`, `soc2-scope`, `customer-facing`, `foundation`, `gdpr`).
+- **`Team`** — name, display name, on-call rotation handle, primary Slack channel.
+- **`Dependency`** — directed edge from one `Service` to another, plus a `DependencyType` (`CALLS`, `READS_FROM`, `PUBLISHES_TO`, `CONSUMES_FROM`).
+
+DTOs in [`catalog/dto/`](src/main/java/com/callibrity/cowork/connector/catalog/dto/) are the wire shape — entities never leak into tool or service responses.
+
+### The eight teams
+
+- **platform** — foundational services (auth, feature flags, Kafka gateway, log aggregator, secrets manager).
+- **identity** — accounts, SSO broker, session store, password reset.
+- **checkout** — cart, payments, order coordination, tax calculation, checkout UI.
+- **catalog** — products, search indexer, inventory, catalog admin.
+- **fulfillment** — shipping, label generation, returns, carrier integrations.
+- **data** — analytics ingester, events bus, reporting (plural), ETL orchestrator.
+- **notifications** — email, push, SMS dispatchers, template renderer.
+- **integrations** — partner gateway, webhook relay.
+
+### The dysfunctions, on purpose
+
+The seed data is shaped around five specific patterns every enterprise engineering org has some version of — these are what make the demo answers resonate:
+
+1. **The deprecated-in-use case.** `reporting-legacy` is marked `DEPRECATED` but is still called by `payment-processor` (for a tax-summary endpoint), `analytics-ingester`, and the orphaned `legacy-invoicing`. Every org has this — the service nobody's migrated off of because it still works. Shows up in `deprecated-in-use` results and in `payment-processor`'s direct dependencies.
+
+2. **The orphan with compliance scope.** `legacy-invoicing` has **no owner** — "Owner left in 2023; team was never reassigned" per its seeded description — and is tagged `pci` and `soc2-scope`. It's still called by other services in the graph. This is the compliance nightmare that every `orphaned-services` query should surface.
+
+3. **The naming-drift cluster.** The data team owns `reports-v2`, `reports-v2-new`, and `reporting-legacy`. The "current" one is ambiguously `reports-v2` (used by `catalog-admin`) while `reports-v2-new` was "the replacement, but the rollout was paused in Q3" and `reporting-legacy` is deprecated-but-still-called. Classic every-shop-has-three-versions cluster.
+
+4. **The retiring service still in the graph.** `webhook-relay` is `RETIRING` but still publishes to `kafka-gateway`. Illustrates how retirement plans and real traffic don't always line up.
+
+5. **The foundational blast radius.** `auth-service` has **17 transitively-impacted dependents across 6 teams**, plus the `legacy-invoicing` orphan. `kafka-gateway`, `feature-flags`, and `events-bus` are similarly load-bearing. Drives `blast-radius` queries and the "which services deserve the strongest SLO" conversation.
+
+### Why it resonates
+
+You can re-point the demo at your real CMDB export or Backstage catalog and every query still makes sense — the tool surface is generic. But the **seeded** data exists to trigger the moment where a viewer says "wait, that's us." The naming-drift cluster, the PCI-scoped orphan, the deprecated service nobody's migrated off — those aren't academic examples. They're real shapes, compressed into 36 services.
 
 ## Not production-ready
 

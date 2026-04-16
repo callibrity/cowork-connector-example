@@ -118,9 +118,7 @@ class CatalogToolsTest {
 
     @Test
     void blastRadiusDelegates() {
-        BlastRadiusDto expected = new BlastRadiusDto(
-                new ServiceSummaryDto("auth-service", "Auth", "platform", "platform", LifecycleStage.ACTIVE, null),
-                List.of(), List.of(), 0);
+        BlastRadiusDto expected = new BlastRadiusDto("auth-service", List.of(), 0);
         when(catalog.blastRadius("auth-service")).thenReturn(expected);
 
         assertThat(tools.blastRadius("auth-service")).isSameAs(expected);

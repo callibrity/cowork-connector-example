@@ -6,11 +6,11 @@ import com.callibrity.cowork.connector.catalog.domain.Service;
 import com.callibrity.cowork.connector.catalog.domain.Team;
 import com.callibrity.cowork.connector.catalog.dto.BlastRadiusDto;
 import com.callibrity.cowork.connector.catalog.dto.DeprecatedUsageDto;
+import com.callibrity.cowork.connector.catalog.dto.ImpactedServiceDetail;
 import com.callibrity.cowork.connector.catalog.dto.RelatedServicesDto;
 import com.callibrity.cowork.connector.catalog.dto.ServiceDto;
 import com.callibrity.cowork.connector.catalog.dto.ServiceSummaryDto;
 import com.callibrity.cowork.connector.catalog.dto.TeamDto;
-import com.callibrity.cowork.connector.catalog.dto.TeamImpactDto;
 import com.callibrity.cowork.connector.catalog.dto.TeamSummaryDto;
 import com.callibrity.cowork.connector.catalog.repository.DependencyRepository;
 import com.callibrity.cowork.connector.catalog.repository.ServiceRepository;
@@ -18,10 +18,8 @@ import com.callibrity.cowork.connector.catalog.repository.TeamRepository;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
@@ -100,33 +98,25 @@ public class DefaultCatalogService implements CatalogService {
                 s -> dependencyRepo.findAllByToService(s),
                 Dependency::getFromService);
 
-        Map<String, List<ServiceSummaryDto>> byTeam = new LinkedHashMap<>();
-        Map<String, Team> teamByName = new LinkedHashMap<>();
         int orphans = 0;
+        List<ImpactedServiceDetail> details = new ArrayList<>(impacted.size());
         for (Service s : impacted) {
             Team owner = s.getOwner();
             if (owner == null) {
                 orphans++;
-                continue;
             }
-            teamByName.putIfAbsent(owner.getName(), owner);
-            byTeam.computeIfAbsent(owner.getName(), k -> new ArrayList<>()).add(toServiceSummary(s));
+            details.add(new ImpactedServiceDetail(
+                    s.getName(),
+                    s.getDisplayName(),
+                    s.getDomain(),
+                    s.getLifecycleStage(),
+                    owner == null ? null : owner.getName(),
+                    owner == null ? null : owner.getOnCallRotation(),
+                    owner == null ? null : owner.getSlackChannel(),
+                    s.getTags()));
         }
 
-        List<TeamImpactDto> teamImpacts = byTeam.entrySet().stream().map(entry -> {
-            Team team = teamByName.get(entry.getKey());
-            return new TeamImpactDto(
-                    toTeamSummary(team),
-                    team.getOnCallRotation(),
-                    team.getSlackChannel(),
-                    entry.getValue());
-        }).toList();
-
-        return new BlastRadiusDto(
-                toServiceSummary(target),
-                impacted.stream().map(this::toServiceSummary).toList(),
-                teamImpacts,
-                orphans);
+        return new BlastRadiusDto(target.getName(), details, orphans);
     }
 
     @Override
