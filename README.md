@@ -194,8 +194,9 @@ Configure a custom connector in Cowork pointing at your ngrok URL (or your real 
 
 ## CI / Release
 
-- `.github/workflows/ci.yml` — `mvn verify` on every push and PR to `main`
-- `.github/workflows/release.yml` — on tag push, builds a native image via buildpacks and publishes it to GHCR (`ghcr.io/<owner>/<repo>:<tag>` and `:latest`). Runs on `ubuntu-latest` (amd64) — suitable for Azure Container Apps and other amd64 hosts. On Apple Silicon, `docker run` will fall back to Rosetta emulation, which works but doesn't reflect production startup numbers.
+- `.github/workflows/ci.yml` — runs `mvn -Pci verify sonar:sonar` on every push and PR to `main`. The `ci` profile activates JaCoCo so SonarCloud gets a coverage report; `mvn verify` also enforces Spotless formatting (Google Java Format) and Apache 2.0 license headers via the mycila plugin. Run `mvn spotless:apply license:format` locally to fix violations before pushing.
+- `.github/workflows/release.yml` — triggered on **GitHub Release creation** (not a bare tag push). Creating a release via `gh release create X.Y.Z --title "X.Y.Z" --notes-file notes.md` builds a native image via Paketo buildpacks and publishes it to GHCR as both `ghcr.io/<owner>/<repo>:X.Y.Z` and `:latest`. Runs on `ubuntu-latest` (amd64) — suitable for Azure Container Apps and other amd64 hosts. On Apple Silicon, `docker run` will fall back to Rosetta emulation, which works but doesn't reflect production startup numbers.
+- `.github/dependabot.yml` — weekly grouped Maven and GitHub Actions updates (Spring, testing, build plugins each grouped) every Monday morning.
 
 ## Extending
 
