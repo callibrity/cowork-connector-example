@@ -44,10 +44,20 @@
         <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
         <spotless-maven-plugin.version>3.4.0</spotless-maven-plugin.version>
         <google-java-format.version>1.35.0</google-java-format.version>
+        <jacoco.plugin.version>0.8.14</jacoco.plugin.version>
+        <sonar.plugin.version>5.5.0.6356</sonar.plugin.version>
 
         <!-- License header configuration -->
         <license.email>contactus@callibrity.com</license.email>
         <license.owner>Callibrity, Inc.</license.owner>
+
+        <!-- SonarCloud configuration -->
+        <sonar.organization>callibrity</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.projectKey>callibrity_cowork-connector-example</sonar.projectKey>
+
+        <!-- Placeholder for jacoco's argLine; populated by the ci profile, empty otherwise. -->
+        <jacocoArgLine></jacocoArgLine>
     </properties>
 
     <dependencies>
@@ -198,6 +208,18 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar.plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>@{jacocoArgLine}</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>${spotless-maven-plugin.version}</version>
@@ -226,6 +248,41 @@
     </build>
 
     <profiles>
+        <!-- CI profile: enables JaCoCo coverage so SonarCloud can ingest a report. -->
+        <profile>
+            <id>ci</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.plugin.version}</version>
+                        <configuration>
+                            <propertyName>jacocoArgLine</propertyName>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <formats>
+                                        <format>XML</format>
+                                    </formats>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>native</id>
             <build>
