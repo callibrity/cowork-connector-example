@@ -18,7 +18,9 @@ package com.callibrity.cowork.connector.catalog.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.callibrity.cowork.connector.catalog.domain.Dependency;
@@ -190,6 +192,7 @@ class DefaultCatalogServiceTest {
       when(serviceRepo.search(eq(null), eq(null), eq(null), any(Pageable.class)))
           .thenReturn(pageOf(List.copyOf(services.values())));
       catalog.listServices("  ", "", null, null, null);
+      verify(serviceRepo).search(eq(null), eq(null), eq(null), any(Pageable.class));
     }
 
     @Test
@@ -307,18 +310,21 @@ class DefaultCatalogServiceTest {
     void negativePageIndexClampsToZero() {
       when(teamRepo.findAll(any(Pageable.class))).thenReturn(pageOf(List.of()));
       catalog.listTeams(-5, 50);
+      verify(teamRepo).findAll(argThat((Pageable p) -> p.getPageNumber() == 0));
     }
 
     @Test
     void nullPageSizeUsesDefault() {
       when(teamRepo.findAll(any(Pageable.class))).thenReturn(pageOf(List.of()));
       catalog.listTeams(0, null);
+      verify(teamRepo).findAll(argThat((Pageable p) -> p.getPageSize() == 20));
     }
 
     @Test
     void oversizedPageSizeClampsToMax() {
       when(teamRepo.findAll(any(Pageable.class))).thenReturn(pageOf(List.of()));
       catalog.listTeams(0, 9999);
+      verify(teamRepo).findAll(argThat((Pageable p) -> p.getPageSize() == 100));
     }
   }
 

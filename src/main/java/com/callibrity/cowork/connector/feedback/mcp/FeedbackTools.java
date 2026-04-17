@@ -86,8 +86,10 @@ public class FeedbackTools {
               description =
                   "Concrete suggested change. State a position: 'add field X to ServiceDto', 'split services-list into two tools', 'rename field Y to Z'. If you can't articulate a concrete change, the friction probably isn't real enough to submit.")
           String suggestedChange) {
-    FeedbackPayload payload = new FeedbackPayload(toolName, type, description, suggestedChange);
-    log.info("{}{}", MARKER, objectMapper.writeValueAsString(payload));
+    if (log.isInfoEnabled()) {
+      FeedbackPayload payload = new FeedbackPayload(toolName, type, description, suggestedChange);
+      log.info("{}{}", MARKER, objectMapper.writeValueAsString(payload));
+    }
     return new FeedbackAckDto(true);
   }
 

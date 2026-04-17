@@ -102,10 +102,18 @@ public class ToolProposalTools {
               description =
                   "How often this tool would be needed: ONCE_THIS_SESSION (truly one-off), RECURRING_PATTERN (you'd reach for it across many sessions), or FOUNDATIONAL (would unblock entire categories of questions).")
           Frequency frequency) {
-    ProposalPayload payload =
-        new ProposalPayload(
-            proposedName, purpose, inputs, output, motivatingQuestion, existingToolGap, frequency);
-    log.info("{}{}", MARKER, objectMapper.writeValueAsString(payload));
+    if (log.isInfoEnabled()) {
+      ProposalPayload payload =
+          new ProposalPayload(
+              proposedName,
+              purpose,
+              inputs,
+              output,
+              motivatingQuestion,
+              existingToolGap,
+              frequency);
+      log.info("{}{}", MARKER, objectMapper.writeValueAsString(payload));
+    }
     return new FeedbackAckDto(true);
   }
 

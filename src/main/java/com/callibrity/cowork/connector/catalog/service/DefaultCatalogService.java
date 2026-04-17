@@ -99,11 +99,7 @@ public class DefaultCatalogService implements CatalogService {
   public RelatedServicesDto serviceDependencies(String name, boolean transitive) {
     Service start = requireService(name);
     List<ServiceSummaryDto> services =
-        traverse(
-                start,
-                transitive,
-                s -> dependencyRepo.findAllByFromService(s),
-                Dependency::getToService)
+        traverse(start, transitive, dependencyRepo::findAllByFromService, Dependency::getToService)
             .stream()
             .map(this::toServiceSummary)
             .toList();
@@ -114,11 +110,7 @@ public class DefaultCatalogService implements CatalogService {
   public RelatedServicesDto serviceDependents(String name, boolean transitive) {
     Service start = requireService(name);
     List<ServiceSummaryDto> services =
-        traverse(
-                start,
-                transitive,
-                s -> dependencyRepo.findAllByToService(s),
-                Dependency::getFromService)
+        traverse(start, transitive, dependencyRepo::findAllByToService, Dependency::getFromService)
             .stream()
             .map(this::toServiceSummary)
             .toList();
@@ -129,8 +121,7 @@ public class DefaultCatalogService implements CatalogService {
   public BlastRadiusDto blastRadius(String name) {
     Service target = requireService(name);
     List<Service> impacted =
-        traverse(
-            target, true, s -> dependencyRepo.findAllByToService(s), Dependency::getFromService);
+        traverse(target, true, dependencyRepo::findAllByToService, Dependency::getFromService);
 
     int orphans = 0;
     List<ImpactedServiceDetail> details = new ArrayList<>(impacted.size());
