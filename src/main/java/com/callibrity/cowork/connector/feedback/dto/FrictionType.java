@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.callibrity.cowork.connector.catalog.dto;
+package com.callibrity.cowork.connector.feedback.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
-public record TeamDto(
-    @Schema(description = "Unique short name") String name,
-    @Schema(description = "Human-readable name") String displayName,
-    @Schema(description = "On-call rotation handle (PagerDuty URL, Slack group, etc.)")
-        String onCallRotation,
-    @Schema(description = "Primary Slack channel for the team") String slackChannel,
-    @Schema(description = "Count of services owned by this team") long serviceCount) {}
+public enum FrictionType {
+  MISSING_FIELD,
+  EXTRA_ROUND_TRIPS,
+  AWKWARD_SCHEMA,
+  AMBIGUOUS_NAMING,
+  AWKWARD_RESPONSE_SHAPE
+}

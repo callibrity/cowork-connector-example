@@ -1,5 +1,7 @@
 # Cowork Connector Example
 
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 A Claude Cowork connector built with Spring Boot 4 and [Mocapi](https://github.com/callibrity/mocapi). It exposes a fictitious service catalog over the MCP protocol so an LLM inside Cowork can answer the questions every enterprise engineering org struggles to answer:
 
 - **Who owns this service?** And what happens if it breaks?
@@ -86,7 +88,7 @@ Earlier revisions of this example carried a working `spring-boot-starter-oauth2-
 
 ## Tools
 
-Nine read-only tools, all returning structured DTOs that Mocapi publishes via auto-generated JSON Schema:
+Nine read-only catalog tools plus two self-improvement tools, all returning structured DTOs that Mocapi publishes via auto-generated JSON Schema:
 
 | Tool | Returns | Purpose |
 |---|---|---|
@@ -99,8 +101,19 @@ Nine read-only tools, all returning structured DTOs that Mocapi publishes via au
 | `blast-radius` | `BlastRadiusDto` | Transitively-impacted services grouped by owning team — "who gets paged if this breaks" |
 | `orphaned-services` | `PageDto<ServiceSummaryDto>` | Services with no owner |
 | `deprecated-in-use` | `PageDto<DeprecatedUsageDto>` | Deprecated services still called by something |
+| `submit-feedback` | `FeedbackAckDto` | Lets the calling LLM report friction with an existing tool — emits an `MCP_FEEDBACK:` log line |
+| `suggest-tool` | `FeedbackAckDto` | Lets the calling LLM propose a brand-new tool the server should add — emits an `MCP_TOOL_PROPOSAL:` log line |
 
 Pagination returns `PaginationDto` metadata (`totalElementCount`, `hasNext`, etc.) so the LLM knows when to page further without being told.
+
+### The self-improvement loop
+
+`submit-feedback` and `suggest-tool` are an experiment in closing the loop on MCP server design: the LLM is the actual user, and most of what makes a tool surface awkward only shows up mid-conversation. The two tools split the signal deliberately:
+
+- **`submit-feedback`** is for friction with an existing tool — a missing field, an extra round-trip, an ambiguous name, an awkward response shape. The description enumerates concrete triggers and demands a `suggestedChange` field that takes a position (forces the LLM past vague hedging).
+- **`suggest-tool`** is for genuinely new tool ideas — questions you needed to answer this session that no existing tool covered. The schema demands an `existingToolGap` field describing which tools you tried first (filters out "wouldn't it be nice" speculation) and a `frequency` estimate (`ONCE_THIS_SESSION` / `RECURRING_PATTERN` / `FOUNDATIONAL`), so the maintainer can filter for the truly load-bearing proposals.
+
+Both tools tell the LLM explicitly: if you didn't hit the trigger condition, don't call the tool — silence is the most useful signal. Each call emits a structured JSON payload at INFO level with a distinct marker (`MCP_FEEDBACK:` vs. `MCP_TOOL_PROPOSAL:`), so a downstream aggregator can split the streams and route them to different decision flows: friction reports cluster into "should we change an existing tool?", proposals cluster into "should we add this tool?". Humans review the resulting PRs; the LLM's individual submissions are noisy signals, not commitments.
 
 ## Architecture
 

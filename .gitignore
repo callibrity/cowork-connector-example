@@ -4,8 +4,10 @@ target/
 *.war
 *.ear
 *.log
+logs/
 .idea/
 *.iml
 *.ipr
 *.iws
 .DS_Store
+.claude/
