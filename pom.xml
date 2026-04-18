@@ -61,6 +61,11 @@
             **/catalog/seed/**,
             **/CoworkConnectorApplication.java
         </sonar.coverage.exclusions>
+        <!-- Service names in the seed graph are schema, not magic values; extracting 36 constants would
+             be strictly worse than the current hand-authored fixture. -->
+        <sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S1192</sonar.issue.ignore.multicriteria.e1.ruleKey>
+        <sonar.issue.ignore.multicriteria.e1.resourceKey>**/catalog/seed/**</sonar.issue.ignore.multicriteria.e1.resourceKey>
 
         <!-- Placeholder for jacoco's argLine; populated by the ci profile, empty otherwise. -->
         <jacocoArgLine></jacocoArgLine>
