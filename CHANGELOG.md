@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-04-18
+
+### Fixed
+
+- Actuator endpoints (including `/actuator/health/liveness` and `/actuator/health/readiness`) are no longer covered by Spring Security's default filter chain. The `mocapi-oauth2-spring-boot-starter` added in 0.5.0 scopes its chain to `/mcp/**` and the metadata path, but Spring Security's default chain then required auth on every remaining path — including the Kubernetes / Azure Container Apps liveness and readiness probes. Probes 401'd, the orchestrator marked the container unhealthy, and the revision crash-looped. A dedicated `SecurityFilterChain` now permits all actuator endpoints via `EndpointRequest.toAnyEndpoint()`.
+
 ## [0.5.0] - 2026-04-18
 
 ### Added
@@ -70,7 +76,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.5.1...HEAD
+[0.5.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.5.1
 [0.5.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.5.0
 [0.4.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.4.0
 [0.3.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.3.0
