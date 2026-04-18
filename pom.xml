@@ -35,7 +35,7 @@
 
     <properties>
         <java.version>25</java.version>
-        <mocapi.version>0.5.0</mocapi.version>
+        <mocapi.version>0.7.0</mocapi.version>
         <substrate.version>0.7.0</substrate.version>
         <jpa-utils.version>0.0.12</jpa-utils.version>
         <swagger-annotations.version>2.2.48</swagger-annotations.version>
@@ -107,7 +107,7 @@
         <!-- Mocapi -->
         <dependency>
             <groupId>com.callibrity.mocapi</groupId>
-            <artifactId>mocapi-spring-boot-starter</artifactId>
+            <artifactId>mocapi-streamable-http-spring-boot-starter</artifactId>
             <version>${mocapi.version}</version>
         </dependency>
         <dependency>

@@ -46,61 +46,18 @@ public class ToolProposalTools {
   @ToolMethod(
       name = "suggest-tool",
       title = "Suggest a New Tool",
-      description =
-          """
-                    Propose a brand-new tool this MCP server should add. Use this when, after
-                    completing a task, you noticed: "I kept needing X but no single tool gave me
-                    X cleanly."
-
-                    USE THIS WHEN:
-                      - You finished a multi-step task and a single hypothetical tool would have
-                        replaced several actual calls.
-                      - You hit a question this session that no existing tool answers, and you
-                        worked around the absence by composing other tools awkwardly.
-                      - The proposed tool would address a recurring pattern of question, not a
-                        one-off curiosity.
-
-                    DO NOT USE THIS FOR:
-                      - Small additions to an existing tool (a missing field, a new filter, a
-                        renamed parameter). Use submit-feedback instead — that's a friction
-                        report on an existing tool, not a new tool.
-                      - Tools you didn't actually need this session. "Wouldn't it be nice if..."
-                        proposals are noise; ground every proposal in a question you actually
-                        had to answer.
-                      - Proposals where you can't articulate what existing tools you tried first.
-                        If the existingToolGap field would be vague, the proposal isn't
-                        grounded enough — don't submit.
-
-                    Submit one call per distinct proposal. If you didn't need a new tool this
-                    session, do not call this — silence is the most useful signal.""")
+      description = "${tools.feedback.suggest-tool.description}")
   public FeedbackAckDto proposeTool(
-      @Schema(
-              description =
-                  "Short kebab-case name you'd give the tool, e.g. 'service-runbook-history'.")
+      @Schema(description = "${tools.feedback.suggest-tool.proposed-name.description}")
           String proposedName,
-      @Schema(
-              description =
-                  "One sentence: what the tool would return and which question it would answer.")
-          String purpose,
-      @Schema(
-              description =
-                  "Free-form description of inputs the tool would take. Name the params and types, e.g. 'name: string (required), since: ISO date (optional)'.")
-          String inputs,
-      @Schema(
-              description =
-                  "Free-form description of the output shape, e.g. 'list of {revision, author, date, summary} ordered newest-first'.")
-          String output,
-      @Schema(
-              description =
-                  "The actual user question from this session that made you want this tool. Quote it if possible.")
+      @Schema(description = "${tools.feedback.suggest-tool.purpose.description}") String purpose,
+      @Schema(description = "${tools.feedback.suggest-tool.inputs.description}") String inputs,
+      @Schema(description = "${tools.feedback.suggest-tool.output.description}") String output,
+      @Schema(description = "${tools.feedback.suggest-tool.motivating-question.description}")
           String motivatingQuestion,
-      @Schema(
-              description =
-                  "Which existing tools you tried for this question and why they didn't suffice. If you can't be specific here, don't submit.")
+      @Schema(description = "${tools.feedback.suggest-tool.existing-tool-gap.description}")
           String existingToolGap,
-      @Schema(
-              description =
-                  "How often this tool would be needed: ONCE_THIS_SESSION (truly one-off), RECURRING_PATTERN (you'd reach for it across many sessions), or FOUNDATIONAL (would unblock entire categories of questions).")
+      @Schema(description = "${tools.feedback.suggest-tool.frequency.description}")
           Frequency frequency) {
     if (log.isInfoEnabled()) {
       ProposalPayload payload =
