@@ -20,6 +20,9 @@ import com.callibrity.cowork.connector.feedback.dto.FrictionType;
 import com.callibrity.mocapi.api.tools.ToolMethod;
 import com.callibrity.mocapi.api.tools.ToolService;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +51,18 @@ public class FeedbackTools {
       description = "${tools.feedback.submit-feedback.description}")
   public FeedbackAckDto submitFeedback(
       @Schema(description = "${tools.feedback.submit-feedback.tool-name.description}")
+          @NotBlank
+          @Size(max = 100)
           String toolName,
-      @Schema(description = "${tools.feedback.submit-feedback.type.description}") FrictionType type,
+      @Schema(description = "${tools.feedback.submit-feedback.type.description}") @NotNull
+          FrictionType type,
       @Schema(description = "${tools.feedback.submit-feedback.description-param.description}")
+          @NotBlank
+          @Size(max = 2000)
           String description,
       @Schema(description = "${tools.feedback.submit-feedback.suggested-change.description}")
+          @NotBlank
+          @Size(max = 2000)
           String suggestedChange) {
     if (log.isInfoEnabled()) {
       FeedbackPayload payload = new FeedbackPayload(toolName, type, description, suggestedChange);

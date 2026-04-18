@@ -27,6 +27,11 @@ import com.callibrity.cowork.connector.catalog.service.CatalogService;
 import com.callibrity.mocapi.api.tools.ToolMethod;
 import com.callibrity.mocapi.api.tools.ToolService;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.jwcarman.jpa.pagination.PageDto;
 import org.springframework.stereotype.Component;
@@ -49,7 +54,11 @@ public class CatalogTools {
       title = "Service Lookup",
       description = "${tools.catalog.service-lookup.description}")
   public ServiceDto serviceLookup(
-      @Schema(description = "Short name of the service, e.g. 'payment-processor'") String name) {
+      @Schema(description = "Short name of the service, e.g. 'payment-processor'")
+          @NotBlank
+          @Size(max = 100)
+          @Pattern(regexp = "^[a-z0-9-]+$")
+          String name) {
     return catalog.lookupService(name);
   }
 
@@ -58,7 +67,11 @@ public class CatalogTools {
       title = "Team Lookup",
       description = "${tools.catalog.team-lookup.description}")
   public TeamDto teamLookup(
-      @Schema(description = "Short name of the team, e.g. 'platform'") String name) {
+      @Schema(description = "Short name of the team, e.g. 'platform'")
+          @NotBlank
+          @Size(max = 100)
+          @Pattern(regexp = "^[a-z0-9-]+$")
+          String name) {
     return catalog.lookupTeam(name);
   }
 
@@ -70,10 +83,12 @@ public class CatalogTools {
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "Filter by business domain (e.g. 'checkout'). Omit for all domains.")
+          @Size(max = 100)
           String domain,
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "Filter by tag (e.g. 'pii', 'pci', 'soc2-scope'). Omit for all tags.")
+          @Size(max = 100)
           String tag,
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
@@ -83,10 +98,13 @@ public class CatalogTools {
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "Zero-based page index. Defaults to 0.")
+          @Min(0)
           Integer pageIndex,
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "Page size. Defaults to 20, capped at 100.")
+          @Min(1)
+          @Max(100)
           Integer pageSize) {
     return catalog.listServices(domain, tag, lifecycle, pageIndex, pageSize);
   }
@@ -99,10 +117,13 @@ public class CatalogTools {
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "Zero-based page index. Defaults to 0.")
+          @Min(0)
           Integer pageIndex,
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "Page size. Defaults to 20, capped at 100.")
+          @Min(1)
+          @Max(100)
           Integer pageSize) {
     return catalog.listTeams(pageIndex, pageSize);
   }
@@ -112,7 +133,11 @@ public class CatalogTools {
       title = "Service Dependencies",
       description = "${tools.catalog.service-dependencies.description}")
   public RelatedServicesDto serviceDependencies(
-      @Schema(description = "Short name of the service") String name,
+      @Schema(description = "Short name of the service")
+          @NotBlank
+          @Size(max = 100)
+          @Pattern(regexp = "^[a-z0-9-]+$")
+          String name,
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "If true, follow dependency edges recursively. Defaults to false.")
@@ -125,7 +150,11 @@ public class CatalogTools {
       title = "Service Dependents",
       description = "${tools.catalog.service-dependents.description}")
   public RelatedServicesDto serviceDependents(
-      @Schema(description = "Short name of the service") String name,
+      @Schema(description = "Short name of the service")
+          @NotBlank
+          @Size(max = 100)
+          @Pattern(regexp = "^[a-z0-9-]+$")
+          String name,
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "If true, follow dependent edges recursively. Defaults to false.")
@@ -139,6 +168,9 @@ public class CatalogTools {
       description = "${tools.catalog.blast-radius.description}")
   public BlastRadiusDto blastRadius(
       @Schema(description = "Short name of the service whose failure is being assessed")
+          @NotBlank
+          @Size(max = 100)
+          @Pattern(regexp = "^[a-z0-9-]+$")
           String name) {
     return catalog.blastRadius(name);
   }
@@ -151,10 +183,13 @@ public class CatalogTools {
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "Zero-based page index. Defaults to 0.")
+          @Min(0)
           Integer pageIndex,
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "Page size. Defaults to 20, capped at 100.")
+          @Min(1)
+          @Max(100)
           Integer pageSize) {
     return catalog.orphanedServices(pageIndex, pageSize);
   }
@@ -167,10 +202,13 @@ public class CatalogTools {
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "Zero-based page index. Defaults to 0.")
+          @Min(0)
           Integer pageIndex,
       @Schema(
               requiredMode = Schema.RequiredMode.NOT_REQUIRED,
               description = "Page size. Defaults to 20, capped at 100.")
+          @Min(1)
+          @Max(100)
           Integer pageSize) {
     return catalog.deprecatedInUse(pageIndex, pageSize);
   }

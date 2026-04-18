@@ -35,7 +35,7 @@
 
     <properties>
         <java.version>25</java.version>
-        <mocapi.version>0.7.0</mocapi.version>
+        <mocapi.version>0.10.0</mocapi.version>
         <substrate.version>0.7.0</substrate.version>
         <jpa-utils.version>0.0.12</jpa-utils.version>
         <swagger-annotations.version>2.2.48</swagger-annotations.version>
@@ -108,6 +108,24 @@
         <dependency>
             <groupId>com.callibrity.mocapi</groupId>
             <artifactId>mocapi-streamable-http-spring-boot-starter</artifactId>
+            <version>${mocapi.version}</version>
+        </dependency>
+        <!-- OAuth2 resource-server protection on the MCP endpoint. Configured via
+             spring.security.oauth2.resourceserver.jwt.* (Auth0 issuer + audience injected in
+             staging / production) and mocapi.oauth2.* (protected-resource metadata). See
+             application.properties for the exact property names the deployment has to set. -->
+        <dependency>
+            <groupId>com.callibrity.mocapi</groupId>
+            <artifactId>mocapi-oauth2-spring-boot-starter</artifactId>
+            <version>${mocapi.version}</version>
+        </dependency>
+        <!-- Jakarta Bean Validation on @ToolMethod / @PromptMethod / @ResourceTemplateMethod
+             parameters. Violations in tool handlers surface as CallToolResult.isError=true
+             (LLM-self-correction path); violations in prompt/resource handlers surface as
+             JSON-RPC -32602 with per-violation {field, message} data. -->
+        <dependency>
+            <groupId>com.callibrity.mocapi</groupId>
+            <artifactId>mocapi-jakarta-validation-spring-boot-starter</artifactId>
             <version>${mocapi.version}</version>
         </dependency>
         <dependency>

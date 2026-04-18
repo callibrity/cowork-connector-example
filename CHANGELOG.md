@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-04-18
+
+### Added
+
+- OAuth2 resource-server protection on the MCP endpoint via the `mocapi-oauth2-spring-boot-starter`. The demo defaults to the Callibrity Auth0 tenant (`callibrity-dev.us.auth0.com`) with the MCP endpoint URL as the token audience, per RFC 8707 / RFC 9728. Staging and production override `spring.security.oauth2.resourceserver.jwt.issuer-uri`, `.audiences`, and `.jwk-set-uri` via environment variables; no application-profile switching.
+- Jakarta Bean Validation on `@ToolMethod` parameters via the `mocapi-jakarta-validation-spring-boot-starter`. `CatalogTools`, `FeedbackTools`, and `ToolProposalTools` now carry `@NotBlank`, `@NotNull`, `@Size`, and `@Valid` annotations; violations surface as `CallToolResult.isError=true` so the LLM can self-correct.
+
+### Changed
+
+- Bump mocapi to 0.10.0. Mocapi auto-derives `mocapi.oauth2.resource` from the single configured audience, so the OAuth2 block is the minimum three properties: issuer + audience + jwks.
+
 ## [0.4.0] - 2026-04-17
 
 ### Changed
@@ -59,7 +70,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.5.0
 [0.4.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.4.0
 [0.3.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.3.0
 [0.2.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.2.0

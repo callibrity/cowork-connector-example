@@ -11,3 +11,5 @@ logs/
 *.iws
 .DS_Store
 .claude/
+# Per-developer local overrides (gitignored). See README for examples.
+application-local.properties

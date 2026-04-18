@@ -20,6 +20,9 @@ import com.callibrity.cowork.connector.feedback.dto.Frequency;
 import com.callibrity.mocapi.api.tools.ToolMethod;
 import com.callibrity.mocapi.api.tools.ToolService;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,15 +52,30 @@ public class ToolProposalTools {
       description = "${tools.feedback.suggest-tool.description}")
   public FeedbackAckDto proposeTool(
       @Schema(description = "${tools.feedback.suggest-tool.proposed-name.description}")
+          @NotBlank
+          @Size(max = 100)
           String proposedName,
-      @Schema(description = "${tools.feedback.suggest-tool.purpose.description}") String purpose,
-      @Schema(description = "${tools.feedback.suggest-tool.inputs.description}") String inputs,
-      @Schema(description = "${tools.feedback.suggest-tool.output.description}") String output,
+      @Schema(description = "${tools.feedback.suggest-tool.purpose.description}")
+          @NotBlank
+          @Size(max = 2000)
+          String purpose,
+      @Schema(description = "${tools.feedback.suggest-tool.inputs.description}")
+          @NotBlank
+          @Size(max = 2000)
+          String inputs,
+      @Schema(description = "${tools.feedback.suggest-tool.output.description}")
+          @NotBlank
+          @Size(max = 2000)
+          String output,
       @Schema(description = "${tools.feedback.suggest-tool.motivating-question.description}")
+          @NotBlank
+          @Size(max = 2000)
           String motivatingQuestion,
       @Schema(description = "${tools.feedback.suggest-tool.existing-tool-gap.description}")
+          @NotBlank
+          @Size(max = 2000)
           String existingToolGap,
-      @Schema(description = "${tools.feedback.suggest-tool.frequency.description}")
+      @Schema(description = "${tools.feedback.suggest-tool.frequency.description}") @NotNull
           Frequency frequency) {
     if (log.isInfoEnabled()) {
       ProposalPayload payload =
