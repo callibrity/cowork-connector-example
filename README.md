@@ -1,6 +1,15 @@
 # Cowork Connector Example
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![GitHub Release](https://img.shields.io/github/v/release/callibrity/cowork-connector-example)](https://github.com/callibrity/cowork-connector-example/pkgs/container/cowork-connector-example)
+
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=callibrity_cowork-connector-example&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=callibrity_cowork-connector-example)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=callibrity_cowork-connector-example&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=callibrity_cowork-connector-example)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=callibrity_cowork-connector-example&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=callibrity_cowork-connector-example)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=callibrity_cowork-connector-example&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=callibrity_cowork-connector-example)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=callibrity_cowork-connector-example&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=callibrity_cowork-connector-example)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=callibrity_cowork-connector-example&metric=coverage)](https://sonarcloud.io/summary/new_code?id=callibrity_cowork-connector-example)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=callibrity_cowork-connector-example&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=callibrity_cowork-connector-example)
 
 A Claude Cowork connector built with Spring Boot 4 and [Mocapi](https://github.com/callibrity/mocapi). It exposes a fictitious service catalog over the MCP protocol so an LLM inside Cowork can answer the questions every enterprise engineering org struggles to answer:
 
