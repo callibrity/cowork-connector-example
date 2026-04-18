@@ -4,6 +4,23 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-17
+
+### Changed
+
+- Bump mocapi to 0.5.0.
+- CI now runs SonarCloud analysis with JaCoCo coverage; seed data and the main application class are excluded from coverage. Fixed the Sonar issues surfaced by the new analysis (lambda simplifications, unconditional logging guards, missing test assertions).
+- License headers use the project `inceptionYear` instead of a hardcoded year.
+
+### Documentation
+
+- README updated to describe the SonarCloud setup, license-header enforcement, and the Release-triggered publish workflow.
+
+### Dependencies
+
+- Bump `io.swagger.core.v3:swagger-annotations` (#4).
+- Bump `actions/checkout` to v6 (#1), `actions/setup-java` to v5 (#3), and `docker/login-action` to v4 (#2).
+
 ## [0.3.0] - 2026-04-16
 
 ### Added
@@ -42,7 +59,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.4.0
 [0.3.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.3.0
 [0.2.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.2.0
 [0.1.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.1.0
