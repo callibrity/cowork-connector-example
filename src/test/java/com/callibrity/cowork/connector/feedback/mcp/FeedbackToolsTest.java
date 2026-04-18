@@ -104,6 +104,20 @@ class FeedbackToolsTest {
   }
 
   @Test
+  void submitFeedbackEmitsNothingWhenInfoLoggingDisabled() {
+    Level previous = logger.getLevel();
+    try {
+      logger.setLevel(Level.WARN);
+      FeedbackAckDto ack =
+          tools.submitFeedback("svc", FrictionType.MISSING_FIELD, "desc", "change");
+      assertThat(appender.list).isEmpty();
+      assertThat(ack.received()).isTrue();
+    } finally {
+      logger.setLevel(previous);
+    }
+  }
+
+  @Test
   void submitFeedbackSerializesEveryFrictionTypeWithoutLoss() throws Exception {
     for (FrictionType type : FrictionType.values()) {
       appender.list.clear();

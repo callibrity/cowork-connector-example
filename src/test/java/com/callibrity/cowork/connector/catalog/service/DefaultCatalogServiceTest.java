@@ -196,6 +196,14 @@ class DefaultCatalogServiceTest {
     }
 
     @Test
+    void listServicesTreatsNullFiltersAsNull() {
+      when(serviceRepo.search(eq(null), eq(null), eq(null), any(Pageable.class)))
+          .thenReturn(pageOf(List.copyOf(services.values())));
+      catalog.listServices(null, null, null, null, null);
+      verify(serviceRepo).search(eq(null), eq(null), eq(null), any(Pageable.class));
+    }
+
+    @Test
     void orphanedServicesFindsServicesWithoutOwner() {
       when(serviceRepo.findAllByOwnerIsNull(any(Pageable.class)))
           .thenReturn(pageOf(List.of(services.get("cart-service"))));

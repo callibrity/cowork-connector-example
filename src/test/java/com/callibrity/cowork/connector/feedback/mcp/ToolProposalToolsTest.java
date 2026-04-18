@@ -113,6 +113,20 @@ class ToolProposalToolsTest {
   }
 
   @Test
+  void proposeToolEmitsNothingWhenInfoLoggingDisabled() {
+    Level previous = logger.getLevel();
+    try {
+      logger.setLevel(Level.WARN);
+      FeedbackAckDto ack =
+          tools.proposeTool("svc", "p", "i", "o", "q", "g", Frequency.ONCE_THIS_SESSION);
+      assertThat(appender.list).isEmpty();
+      assertThat(ack.received()).isTrue();
+    } finally {
+      logger.setLevel(previous);
+    }
+  }
+
+  @Test
   void proposeToolSerializesEveryFrequencyWithoutLoss() throws Exception {
     for (Frequency frequency : Frequency.values()) {
       appender.list.clear();
