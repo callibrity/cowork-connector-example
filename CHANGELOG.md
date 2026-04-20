@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-04-20
+
+### Changed
+
+- Release workflow now publishes a JVM image via Paketo buildpacks instead of a native image. Static-final-Logger `<clinit>` traps across several mocapi classes (`MocapiO11yAutoConfiguration`, `McpResourcesService`, and likely others) cause the GraalVM heap scanner to reject `NOP_FallbackServiceProvider` instances baked in during build-time init. Rather than chase each class via `native-image.properties`, we're on JVM runtime until an upstream mocapi patch removes the pattern. Image starts in ~1.5s rather than ~0.15s; RSS rises from ~140 MiB to ~300 MiB. Release cycle drops from ~8 minutes to ~1 minute, which is the point for now.
+
 ## [0.7.1] - 2026-04-20
 
 ### Fixed
@@ -99,7 +105,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.7.1...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.8.0
 [0.7.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.7.1
 [0.7.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.7.0
 [0.6.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.6.0
