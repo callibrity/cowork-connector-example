@@ -96,32 +96,45 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+        <!-- Runtime DB is Postgres; H2 stays on the classpath for tests only. -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>runtime</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jwcarman.jpa</groupId>
             <artifactId>jpa-utils</artifactId>
             <version>${jpa-utils.version}</version>
         </dependency>
-        <!-- Substrate Redis backend: backs Mocapi's session Mailbox / Notifier / Journal /
-             Atom with Redis so sessions survive across replicas. Without this, Substrate's
-             SubstrateAutoConfiguration falls back to in-memory implementations that are
-             single-node only. Spring Boot's RedisAutoConfiguration reads spring.data.redis.*
-             env vars at startup and builds a LettuceConnectionFactory. -->
-        <dependency>
-            <groupId>org.jwcarman.substrate</groupId>
-            <artifactId>substrate-redis</artifactId>
-        </dependency>
+        <!-- Liquibase manages the catalog schema (service / team / dependency / service_tag).
+             Substrate-postgresql manages its own session-state tables via bundled SQL scripts
+             gated on substrate.*.auto-create-schema flags, so the two migration stories don't
+             overlap. Hibernate runs in ddl-auto=validate mode to verify the live schema
+             matches our entities. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <artifactId>spring-boot-liquibase</artifactId>
         </dependency>
+        <!-- Substrate Postgres backend: backs Mocapi's session Mailbox / Notifier / Journal /
+             Atom with Postgres so sessions survive across app restarts. Shares the primary
+             Spring DataSource. -->
         <dependency>
-            <groupId>io.lettuce</groupId>
-            <artifactId>lettuce-core</artifactId>
+            <groupId>org.jwcarman.substrate</groupId>
+            <artifactId>substrate-postgresql</artifactId>
+        </dependency>
+        <!-- spring-boot-docker-compose: when present on the classpath, `mvn spring-boot:run`
+             auto-starts the services declared in compose.yaml (a local Postgres) and injects
+             spring.datasource.* properties pointing at it. Keeps local dev one-command. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-docker-compose</artifactId>
+            <optional>true</optional>
         </dependency>
         <!-- Mocapi -->
         <dependency>

@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-04-20
+
+### Changed
+
+- Session-state backend swapped from Redis to Postgres via `substrate-postgresql`. Azure Cache for Redis Basic C0 runs Redis 6 and rejects `EXPIRE … NX/XX/GT/LT` (a Redis 7+ form substrate-redis emits) at the protocol level; rather than chase Redis versions across SKUs, reuse the existing Postgres 16 server we already have in both environments. Same `DataSource` serves the catalog and substrate's session-state tables.
+- Catalog runtime DB is now Postgres instead of in-memory H2. H2 stays on the classpath at `test` scope for the existing unit tests.
+- `org.springframework.boot:spring-boot-docker-compose` auto-starts a local Postgres container via `compose.yaml` on `mvn spring-boot:run`, so local dev stays one-command.
+
+### Added
+
+- Liquibase manages the catalog schema (`service`, `team`, `dependency`, `service_tag`) via an XML changelog at `db/changelog/db.changelog-master.xml`. Pulled `spring-boot-liquibase` explicitly so Spring Boot 4's split autoconfig finds the `LiquibaseAutoConfiguration`. Substrate-postgresql creates its own session-state tables at startup via its bundled SQL + `auto-create-schema` defaults, so the two migration stories don't overlap. Hibernate runs in `ddl-auto=validate` mode to assert the live schema matches the JPA entities.
+
 ## [0.9.0] - 2026-04-20
 
 ### Added
@@ -122,7 +134,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.9.0...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.10.0...HEAD
+[0.10.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.10.0
 [0.9.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.9.0
 [0.8.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.8.1
 [0.8.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.8.0
