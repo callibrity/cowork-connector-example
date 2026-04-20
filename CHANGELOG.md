@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-04-20
+
+### Changed
+
+- Bump mocapi to 0.11.0. 0.11.0 removes `@ToolService` (tool-bearing beans are now discovered from `@Component` directly) and renames `@ToolMethod` to `@McpTool`. `CatalogTools`, `FeedbackTools`, and `ToolProposalTools` have been updated accordingly.
+
 ## [0.5.1] - 2026-04-18
 
 ### Fixed
@@ -76,7 +82,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.5.1...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.6.0
 [0.5.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.5.1
 [0.5.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.5.0
 [0.4.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.4.0
