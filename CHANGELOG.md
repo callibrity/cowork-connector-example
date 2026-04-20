@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.12.4] - 2026-04-20
+
+### Fixed
+
+- Trace spans didn't flow to the sidecar collector (and therefore to App Insights) under native. Root cause: `application.properties` was using raw OTel SDK env-var conventions (`otel.traces.sampler=parentbased_traceidratio`, `otel.traces.sampler.arg=0.25`), which Spring Boot 4's `MicrometerTracingAutoConfiguration` doesn't read. Metrics kept working because Micrometer's `OtlpMeterRegistry` uses a different pipeline. Switched to Spring Boot properties: `management.tracing.enabled=true`, `management.tracing.sampling.probability=1.0`, `management.opentelemetry.tracing.export.otlp.endpoint=http://localhost:4318/v1/traces`. Verified locally via a Jaeger instance running on 4318 — tool-call traces now show up end-to-end (parent `http post /mcp` → `tools/call` → tool-named span like `blast-radius` → Spring Security filterchain spans). The actual tool name appears as the span operation name, which is nicer than the old `mcp.tool` + customDimensions pattern.
+
 ## [0.12.3] - 2026-04-20
 
 ### Fixed
@@ -183,7 +189,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.12.3...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.12.4...HEAD
+[0.12.4]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.4
 [0.12.3]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.3
 [0.12.2]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.2
 [0.12.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.1
