@@ -41,8 +41,7 @@ jobs:
       - name: Build JVM image via buildpacks
         run: |
           mvn --batch-mode spring-boot:build-image -DskipTests \
-            -Dspring-boot.build-image.imageName=${IMAGE}:${GITHUB_REF_NAME} \
-            -Dspring-boot.build-image.env.BP_JVM_VERSION=25
+            -Dspring-boot.build-image.imageName=${IMAGE}:${GITHUB_REF_NAME}
 
       - name: Tag as latest
         run: docker tag ${IMAGE}:${GITHUB_REF_NAME} ${IMAGE}:latest
