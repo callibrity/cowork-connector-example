@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-04-20
+
+### Added
+
+- Observability stack via Mocapi + OpenTelemetry. `mocapi-logging` stamps `mcp.session`, `mcp.handler.kind`, and `mcp.handler.name` on the SLF4J MDC for every handler invocation. `mocapi-o11y` wraps each handler call in a Micrometer Observation, producing metrics and tracing spans. `mocapi-actuator` exposes `/actuator/mcp` with a read-only inventory of registered tools / prompts / resources with schema digests.
+- OTel shipping path to Azure Application Insights. `micrometer-tracing-bridge-otel` bridges Micrometer Observations to OTel traces; `opentelemetry-logback-appender-1.0` bridges Logback events to OTel logs (with MDC captured as searchable attributes); `azure-monitor-opentelemetry-autoconfigure` (SDK mode, not the Java agent — GraalVM-native compatible) exports everything to App Insights when `APPLICATIONINSIGHTS_CONNECTION_STRING` is set. Default sampler is `parentbased_traceidratio` at 0.25; override via `OTEL_TRACES_SAMPLER` / `OTEL_TRACES_SAMPLER_ARG` without a rebuild.
+
+### Changed
+
+- `/actuator/mcp` is exposed by default (`management.endpoints.web.exposure.include` now includes `mcp` alongside `health` and `info`).
+
 ## [0.6.0] - 2026-04-20
 
 ### Changed
@@ -82,7 +93,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.7.0
 [0.6.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.6.0
 [0.5.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.5.1
 [0.5.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.5.0
