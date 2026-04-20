@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-04-20
+
+### Added
+
+- Redis-backed session state via `org.jwcarman.substrate:substrate-redis`. Mocapi's session Mailbox / Notifier / Journal / Atom now persist to Redis instead of Substrate's in-memory fallback, so sessions survive across replicas. Consumes `SPRING_DATA_REDIS_HOST` and `SPRING_DATA_REDIS_PASSWORD` via Spring Boot's Redis autoconfiguration. Lettuce is the transport (added explicitly alongside `spring-boot-starter-data-redis`). The matching infra — a `redis:alpine` container app with TCP ingress internal-only on 6379 and a terraform-generated AUTH password — ships in `azure-infra`.
+
+### Changed
+
+- Import `org.jwcarman.substrate:substrate-bom` so Substrate module versions align without per-dependency version pins.
+- `spring.data.redis.repositories.enabled=false` — Spring Data Redis is on the classpath for Substrate's backend, but our `@Repository` interfaces are JPA. Disabling the Redis repo scan prevents it from claiming them.
+
 ## [0.8.1] - 2026-04-20
 
 ### Fixed
@@ -111,7 +122,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.8.1...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.9.0
 [0.8.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.8.1
 [0.8.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.8.0
 [0.7.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.7.1
