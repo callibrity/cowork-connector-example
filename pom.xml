@@ -28,7 +28,7 @@
 
     <groupId>com.callibrity.cowork</groupId>
     <artifactId>cowork-connector-example</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.8.1-SNAPSHOT</version>
     <name>Cowork Connector Example</name>
     <description>Example MCP connector for Claude Cowork, built with Spring Boot and Mocapi</description>
     <inceptionYear>2026</inceptionYear>
@@ -39,8 +39,8 @@
         <substrate.version>0.7.0</substrate.version>
         <jpa-utils.version>0.0.12</jpa-utils.version>
         <swagger-annotations.version>2.2.48</swagger-annotations.version>
-        <azure-monitor-opentelemetry.version>1.4.0</azure-monitor-opentelemetry.version>
-        <opentelemetry-logback-appender.version>2.26.1-alpha</opentelemetry-logback-appender.version>
+        <spring-cloud-azure.version>7.2.0</spring-cloud-azure.version>
+        <opentelemetry-logback-appender.version>2.24.0-alpha</opentelemetry-logback-appender.version>
 
         <!-- Code-quality plugin versions -->
         <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
@@ -159,9 +159,9 @@
             <artifactId>micrometer-tracing-bridge-otel</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.azure</groupId>
-            <artifactId>azure-monitor-opentelemetry-autoconfigure</artifactId>
-            <version>${azure-monitor-opentelemetry.version}</version>
+            <groupId>com.azure.spring</groupId>
+            <artifactId>spring-cloud-azure-starter-monitor</artifactId>
+            <version>${spring-cloud-azure.version}</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
