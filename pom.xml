@@ -150,10 +150,12 @@
             <groupId>com.callibrity.mocapi</groupId>
             <artifactId>mocapi-actuator</artifactId>
         </dependency>
-        <!-- Observability exporter: Micrometer Observation -> OTel traces/metrics, OTel Logback
-             appender -> OTel logs, all shipped to Application Insights via the Azure Monitor
-             OpenTelemetry autoconfigure module. The Azure SDK reads APPLICATIONINSIGHTS_CONNECTION_STRING
-             at startup and registers the exporters; no agent required (native-image compatible). -->
+        <!-- Observability export: Micrometer Observation -> OTel traces/metrics (via the tracing
+             bridge), OTel Logback appender -> OTel logs. The Spring Cloud Azure monitor starter
+             is a Spring Boot auto-configuration that reads APPLICATIONINSIGHTS_CONNECTION_STRING
+             at startup and plugs the Azure Monitor exporter into Spring's OpenTelemetry bean.
+             Uses the SDK path, not the Application Insights Java agent, so it's compatible with
+             GraalVM native-image (once the upstream mocapi static-logger fix lands). -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-otel</artifactId>

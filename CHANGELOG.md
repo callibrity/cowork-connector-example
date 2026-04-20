@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-04-20
+
+### Fixed
+
+- OpenTelemetry traces/metrics/logs now actually reach Application Insights. 0.8.0 shipped `com.azure:azure-monitor-opentelemetry-autoconfigure`, which only hooks in through the OpenTelemetry SDK auto-configure SPI — but Spring Boot 4's `OpenTelemetryAutoConfiguration` constructs its own `OpenTelemetry` bean and never invokes that SPI, so the Azure Monitor exporter silently never initialized. Swapped to `com.azure.spring:spring-cloud-azure-starter-monitor` (7.2.0), which is a real Spring Boot auto-configuration that reads `APPLICATIONINSIGHTS_CONNECTION_STRING` and plugs the exporter into Spring's OTel bean at startup. Also pinned `opentelemetry-logback-appender-1.0` to `2.24.0-alpha` to align with the incubator-api version pulled in by the Spring Cloud Azure starter's OTel JDBC instrumentation.
+
 ## [0.8.0] - 2026-04-20
 
 ### Changed
@@ -105,7 +111,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.8.0...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.8.1...HEAD
+[0.8.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.8.1
 [0.8.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.8.0
 [0.7.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.7.1
 [0.7.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.7.0
