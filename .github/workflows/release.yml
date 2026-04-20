@@ -1,15 +1,11 @@
-name: Release JVM image
-
-# Temporarily building a JVM image (not native) so releases turn around in
-# ~1 minute instead of ~7-8. Switch back to the native profile once the
-# upstream mocapi native-image fix lands.
+name: Release native image
 
 on:
   release:
     types: [created]
 
 jobs:
-  jvm-image:
+  native-image:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -38,10 +34,11 @@ jobs:
       - name: Set pom version to tag
         run: mvn --batch-mode versions:set -DnewVersion=${GITHUB_REF_NAME} -DgenerateBackupPoms=false
 
-      - name: Build JVM image via buildpacks
+      - name: Build native image via buildpacks
         run: |
-          mvn --batch-mode spring-boot:build-image -DskipTests \
-            -Dspring-boot.build-image.imageName=${IMAGE}:${GITHUB_REF_NAME}
+          mvn --batch-mode -Pnative spring-boot:build-image -DskipTests \
+            -Dspring-boot.build-image.imageName=${IMAGE}:${GITHUB_REF_NAME} \
+            -Dspring-boot.build-image.env.BP_NATIVE_IMAGE=true
 
       - name: Tag as latest
         run: docker tag ${IMAGE}:${GITHUB_REF_NAME} ${IMAGE}:latest

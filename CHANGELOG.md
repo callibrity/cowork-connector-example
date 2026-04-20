@@ -4,6 +4,20 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-04-20
+
+### Changed
+
+- Bump mocapi to 0.12.1. 0.12.x introduces `mocapi-otel` (bundles `mocapi-o11y` with Spring Boot's `spring-boot-starter-opentelemetry` so the Micrometer Observation → OTel span bridge wires up with one dep). 0.12.1 added `mocapi-otel` to `mocapi-bom`, so consumers no longer need an explicit version pin.
+- Release workflow switches back to publishing a **native image** via Paketo buildpacks. The upstream mocapi static-final-Logger `<clinit>` issues that blocked 0.7.1 and 0.8.0 are resolved in the 0.12.x line; no `native-image.properties` workaround required in this repo.
+
+### Removed
+
+- Explicit `mocapi-o11y` dep (now transitive via `mocapi-otel`).
+- Explicit `spring-boot-starter-opentelemetry` dep (now transitive via `mocapi-otel`).
+- Explicit `spring-boot-starter-oauth2-resource-server` dep (transitive via `mocapi-oauth2`).
+- Explicit `io.swagger.core.v3:swagger-annotations` dep + its version property (transitive via several mocapi modules).
+
 ## [0.10.1] - 2026-04-20
 
 ### Fixed
@@ -140,7 +154,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.10.1...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.11.0
 [0.10.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.10.1
 [0.10.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.10.0
 [0.9.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.9.0
