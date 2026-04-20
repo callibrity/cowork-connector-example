@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-04-20
+
+### Changed
+
+- Shipping telemetry via an **OTel collector sidecar** instead of an Azure-specific Spring starter. The app emits pure OTLP to `http://localhost:4318`; the sidecar (running `otel/opentelemetry-collector-contrib`) receives it and translates to Azure Monitor's wire format before shipping to App Insights. Eliminates the Spring Boot 4 vs. Azure's OTel-community-starter signer collision that blocked native-image builds, keeps the app image's classpath free of Azure-specific libs, and makes swapping App Insights for any other OTLP-compatible backend a collector-config edit.
+- Restored native-image release workflow (no longer on the JVM-fallback path).
+
+### Removed
+
+- `com.azure:azure-monitor-opentelemetry-autoconfigure` dep + `azure-monitor-opentelemetry.version` property. Azure ingestion is now the sidecar collector's job, not the app's.
+
 ## [0.11.0] - 2026-04-20
 
 ### Changed
@@ -154,7 +165,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.0
 [0.11.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.11.0
 [0.10.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.10.1
 [0.10.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.10.0

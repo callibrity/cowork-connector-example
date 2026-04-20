@@ -38,7 +38,6 @@
         <mocapi.version>0.12.1</mocapi.version>
         <substrate.version>0.7.0</substrate.version>
         <jpa-utils.version>0.0.12</jpa-utils.version>
-        <spring-cloud-azure.version>7.2.0</spring-cloud-azure.version>
         <opentelemetry-logback-appender.version>2.24.0-alpha</opentelemetry-logback-appender.version>
 
         <!-- Code-quality plugin versions -->
@@ -179,17 +178,12 @@
             <groupId>com.callibrity.mocapi</groupId>
             <artifactId>mocapi-actuator</artifactId>
         </dependency>
-        <!-- Observability export: Micrometer Observation -> OTel traces/metrics (via the tracing
-             bridge), OTel Logback appender -> OTel logs. The Spring Cloud Azure monitor starter
-             is a Spring Boot auto-configuration that reads APPLICATIONINSIGHTS_CONNECTION_STRING
-             at startup and plugs the Azure Monitor exporter into Spring's OpenTelemetry bean.
-             Uses the SDK path, not the Application Insights Java agent, so it's compatible with
-             GraalVM native-image (once the upstream mocapi static-logger fix lands). -->
-        <dependency>
-            <groupId>com.azure.spring</groupId>
-            <artifactId>spring-cloud-azure-starter-monitor</artifactId>
-            <version>${spring-cloud-azure.version}</version>
-        </dependency>
+        <!-- OTel logback appender: Logback log events -> OTel LogRecords. Spring Boot's OTel
+             starter (transitive via mocapi-otel) ships the OTLP exporter that pushes these to
+             the sidecar collector, which translates to Azure Monitor's wire format before
+             sending to App Insights. Nothing Azure-specific on this app's classpath — the
+             sidecar owns the Azure integration, keeping this image GraalVM-native-safe and
+             backend-portable. -->
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-logback-appender-1.0</artifactId>
