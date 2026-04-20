@@ -24,8 +24,7 @@ import com.callibrity.cowork.connector.catalog.dto.ServiceSummaryDto;
 import com.callibrity.cowork.connector.catalog.dto.TeamDto;
 import com.callibrity.cowork.connector.catalog.dto.TeamSummaryDto;
 import com.callibrity.cowork.connector.catalog.service.CatalogService;
-import com.callibrity.mocapi.api.tools.ToolMethod;
-import com.callibrity.mocapi.api.tools.ToolService;
+import com.callibrity.mocapi.api.tools.McpTool;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -42,14 +41,13 @@ import org.springframework.stereotype.Component;
  * parameter schemas) and the service stays transport-agnostic. A future REST adapter would look
  * symmetrically thin over the same {@code CatalogService}.
  */
-@ToolService
 @Component
 @RequiredArgsConstructor
 public class CatalogTools {
 
   private final CatalogService catalog;
 
-  @ToolMethod(
+  @McpTool(
       name = "service-lookup",
       title = "Service Lookup",
       description = "${tools.catalog.service-lookup.description}")
@@ -62,7 +60,7 @@ public class CatalogTools {
     return catalog.lookupService(name);
   }
 
-  @ToolMethod(
+  @McpTool(
       name = "team-lookup",
       title = "Team Lookup",
       description = "${tools.catalog.team-lookup.description}")
@@ -75,7 +73,7 @@ public class CatalogTools {
     return catalog.lookupTeam(name);
   }
 
-  @ToolMethod(
+  @McpTool(
       name = "services-list",
       title = "Services List",
       description = "${tools.catalog.services-list.description}")
@@ -109,7 +107,7 @@ public class CatalogTools {
     return catalog.listServices(domain, tag, lifecycle, pageIndex, pageSize);
   }
 
-  @ToolMethod(
+  @McpTool(
       name = "teams-list",
       title = "Teams List",
       description = "${tools.catalog.teams-list.description}")
@@ -128,7 +126,7 @@ public class CatalogTools {
     return catalog.listTeams(pageIndex, pageSize);
   }
 
-  @ToolMethod(
+  @McpTool(
       name = "service-dependencies",
       title = "Service Dependencies",
       description = "${tools.catalog.service-dependencies.description}")
@@ -145,7 +143,7 @@ public class CatalogTools {
     return catalog.serviceDependencies(name, Boolean.TRUE.equals(transitive));
   }
 
-  @ToolMethod(
+  @McpTool(
       name = "service-dependents",
       title = "Service Dependents",
       description = "${tools.catalog.service-dependents.description}")
@@ -162,7 +160,7 @@ public class CatalogTools {
     return catalog.serviceDependents(name, Boolean.TRUE.equals(transitive));
   }
 
-  @ToolMethod(
+  @McpTool(
       name = "blast-radius",
       title = "Blast Radius",
       description = "${tools.catalog.blast-radius.description}")
@@ -175,7 +173,7 @@ public class CatalogTools {
     return catalog.blastRadius(name);
   }
 
-  @ToolMethod(
+  @McpTool(
       name = "orphaned-services",
       title = "Orphaned Services",
       description = "${tools.catalog.orphaned-services.description}")
@@ -194,7 +192,7 @@ public class CatalogTools {
     return catalog.orphanedServices(pageIndex, pageSize);
   }
 
-  @ToolMethod(
+  @McpTool(
       name = "deprecated-in-use",
       title = "Deprecated Services Still In Use",
       description = "${tools.catalog.deprecated-in-use.description}")

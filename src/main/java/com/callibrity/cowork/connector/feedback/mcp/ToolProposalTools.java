@@ -17,8 +17,7 @@ package com.callibrity.cowork.connector.feedback.mcp;
 
 import com.callibrity.cowork.connector.feedback.dto.FeedbackAckDto;
 import com.callibrity.cowork.connector.feedback.dto.Frequency;
-import com.callibrity.mocapi.api.tools.ToolMethod;
-import com.callibrity.mocapi.api.tools.ToolService;
+import com.callibrity.mocapi.api.tools.McpTool;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -36,7 +35,6 @@ import tools.jackson.databind.ObjectMapper;
  * JSON payload, intended to be aggregated by a downstream agent that drafts PRs adding the
  * highest-conviction proposals.
  */
-@ToolService
 @Component
 @RequiredArgsConstructor
 public class ToolProposalTools {
@@ -46,7 +44,7 @@ public class ToolProposalTools {
 
   private final ObjectMapper objectMapper;
 
-  @ToolMethod(
+  @McpTool(
       name = "suggest-tool",
       title = "Suggest a New Tool",
       description = "${tools.feedback.suggest-tool.description}")

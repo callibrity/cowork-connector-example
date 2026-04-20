@@ -17,8 +17,7 @@ package com.callibrity.cowork.connector.feedback.mcp;
 
 import com.callibrity.cowork.connector.feedback.dto.FeedbackAckDto;
 import com.callibrity.cowork.connector.feedback.dto.FrictionType;
-import com.callibrity.mocapi.api.tools.ToolMethod;
-import com.callibrity.mocapi.api.tools.ToolService;
+import com.callibrity.mocapi.api.tools.McpTool;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -35,7 +34,6 @@ import tools.jackson.databind.ObjectMapper;
  * with {@code MCP_FEEDBACK:} followed by a JSON payload, ready to be scraped from Log Analytics and
  * fed into a downstream aggregator.
  */
-@ToolService
 @Component
 @RequiredArgsConstructor
 public class FeedbackTools {
@@ -45,7 +43,7 @@ public class FeedbackTools {
 
   private final ObjectMapper objectMapper;
 
-  @ToolMethod(
+  @McpTool(
       name = "submit-feedback",
       title = "Submit Tool-Friction Feedback",
       description = "${tools.feedback.submit-feedback.description}")
