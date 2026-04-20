@@ -28,17 +28,16 @@
 
     <groupId>com.callibrity.cowork</groupId>
     <artifactId>cowork-connector-example</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <version>0.11.0-SNAPSHOT</version>
     <name>Cowork Connector Example</name>
     <description>Example MCP connector for Claude Cowork, built with Spring Boot and Mocapi</description>
     <inceptionYear>2026</inceptionYear>
 
     <properties>
         <java.version>25</java.version>
-        <mocapi.version>0.11.0</mocapi.version>
+        <mocapi.version>0.12.1</mocapi.version>
         <substrate.version>0.7.0</substrate.version>
         <jpa-utils.version>0.0.12</jpa-utils.version>
-        <swagger-annotations.version>2.2.48</swagger-annotations.version>
         <spring-cloud-azure.version>7.2.0</spring-cloud-azure.version>
         <opentelemetry-logback-appender.version>2.24.0-alpha</opentelemetry-logback-appender.version>
 
@@ -144,11 +143,9 @@
         <!-- OAuth2 resource-server protection on the MCP endpoint. Configured via
              spring.security.oauth2.resourceserver.jwt.* (Auth0 issuer + audience injected in
              staging / production) and mocapi.oauth2.* (protected-resource metadata). See
-             application.properties for the exact property names the deployment has to set. -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-        </dependency>
+             application.properties for the exact property names the deployment has to set.
+             mocapi-oauth2 transitively pulls in spring-boot-starter-oauth2-resource-server,
+             so the Spring Security starter doesn't need its own declaration. -->
         <dependency>
             <groupId>com.callibrity.mocapi</groupId>
             <artifactId>mocapi-oauth2</artifactId>
@@ -168,11 +165,13 @@
             <groupId>com.callibrity.mocapi</groupId>
             <artifactId>mocapi-logging</artifactId>
         </dependency>
-        <!-- Micrometer Observation wrapper around every handler call: produces metrics and
-             distributed-tracing spans via whichever observation handlers are on the classpath. -->
+        <!-- mocapi-otel: bundles mocapi-o11y (Observation wrapper on every handler) with
+             Spring Boot's spring-boot-starter-opentelemetry, which in Spring Boot 4 is the
+             dep that activates MicrometerTracingAutoConfiguration + registers the
+             DefaultTracingObservationHandler that bridges Observations to OTel spans. -->
         <dependency>
             <groupId>com.callibrity.mocapi</groupId>
-            <artifactId>mocapi-o11y</artifactId>
+            <artifactId>mocapi-otel</artifactId>
         </dependency>
         <!-- /actuator/mcp read-only inventory endpoint: lists registered tools / prompts /
              resources with schema digests so ops can see what's running without opening a session. -->
@@ -186,14 +185,6 @@
              at startup and plugs the Azure Monitor exporter into Spring's OpenTelemetry bean.
              Uses the SDK path, not the Application Insights Java agent, so it's compatible with
              GraalVM native-image (once the upstream mocapi static-logger fix lands). -->
-        <!-- Brings Micrometer Observation → OTel span bridge (DefaultTracingObservationHandler),
-             the OTel SDK, OTLP exporter, and the Spring Boot 4 autoconfig that wires them
-             together. Without this starter the autoconfig module is missing and
-             Observations produce metrics but never spans. -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-opentelemetry</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.azure.spring</groupId>
             <artifactId>spring-cloud-azure-starter-monitor</artifactId>
@@ -203,13 +194,6 @@
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-logback-appender-1.0</artifactId>
             <version>${opentelemetry-logback-appender.version}</version>
-        </dependency>
-
-        <!-- Swagger annotations for parameter descriptions -->
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>${swagger-annotations.version}</version>
         </dependency>
 
         <!-- Lombok -->
