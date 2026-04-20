@@ -28,7 +28,7 @@
 
     <groupId>com.callibrity.cowork</groupId>
     <artifactId>cowork-connector-example</artifactId>
-    <version>0.12.4-SNAPSHOT</version>
+    <version>0.13.0-SNAPSHOT</version>
     <name>Cowork Connector Example</name>
     <description>Example MCP connector for Claude Cowork, built with Spring Boot and Mocapi</description>
     <inceptionYear>2026</inceptionYear>
