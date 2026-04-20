@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.12.2] - 2026-04-20
+
+### Fixed
+
+- Native-image startup failed on 0.12.1 at Hibernate's `MultiIdEntityLoaderArrayParam.<init>` with `Cannot reflectively instantiate the array class 'java.util.UUID[]'`. Our entities use UUID primary keys (from jpa-utils' `BaseEntity`), and Hibernate calls `Array.newInstance(UUID.class, n)` for batch-id lookups. The UUID[] array type isn't in Hibernate's native-image reachability metadata (probably because Long[] / Integer[] is more common for PKs). Added `java.util.UUID[]` to `reflect-config.json` with `unsafeAllocated: true` so the native image has the array type available at runtime.
+
 ## [0.12.1] - 2026-04-20
 
 ### Fixed
@@ -171,7 +177,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.12.1...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.12.2...HEAD
+[0.12.2]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.2
 [0.12.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.1
 [0.12.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.0
 [0.11.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.11.0
