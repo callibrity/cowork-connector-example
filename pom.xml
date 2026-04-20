@@ -39,6 +39,8 @@
         <substrate.version>0.7.0</substrate.version>
         <jpa-utils.version>0.0.12</jpa-utils.version>
         <swagger-annotations.version>2.2.48</swagger-annotations.version>
+        <azure-monitor-opentelemetry.version>1.4.0</azure-monitor-opentelemetry.version>
+        <opentelemetry-logback-appender.version>2.26.1-alpha</opentelemetry-logback-appender.version>
 
         <!-- Code-quality plugin versions -->
         <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
@@ -128,6 +130,43 @@
         <dependency>
             <groupId>com.callibrity.mocapi</groupId>
             <artifactId>mocapi-jakarta-validation</artifactId>
+        </dependency>
+        <!-- SLF4J MDC correlation on handler invocations: stamps mcp.session / mcp.handler.kind /
+             mcp.handler.name on the MDC so every log line (including user handler code) carries
+             correlation context. -->
+        <dependency>
+            <groupId>com.callibrity.mocapi</groupId>
+            <artifactId>mocapi-logging</artifactId>
+        </dependency>
+        <!-- Micrometer Observation wrapper around every handler call: produces metrics and
+             distributed-tracing spans via whichever observation handlers are on the classpath. -->
+        <dependency>
+            <groupId>com.callibrity.mocapi</groupId>
+            <artifactId>mocapi-o11y</artifactId>
+        </dependency>
+        <!-- /actuator/mcp read-only inventory endpoint: lists registered tools / prompts /
+             resources with schema digests so ops can see what's running without opening a session. -->
+        <dependency>
+            <groupId>com.callibrity.mocapi</groupId>
+            <artifactId>mocapi-actuator</artifactId>
+        </dependency>
+        <!-- Observability exporter: Micrometer Observation -> OTel traces/metrics, OTel Logback
+             appender -> OTel logs, all shipped to Application Insights via the Azure Monitor
+             OpenTelemetry autoconfigure module. The Azure SDK reads APPLICATIONINSIGHTS_CONNECTION_STRING
+             at startup and registers the exporters; no agent required (native-image compatible). -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-monitor-opentelemetry-autoconfigure</artifactId>
+            <version>${azure-monitor-opentelemetry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+            <version>${opentelemetry-logback-appender.version}</version>
         </dependency>
 
         <!-- Swagger annotations for parameter descriptions -->
