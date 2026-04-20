@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.12.3] - 2026-04-20
+
+### Fixed
+
+- Native-image startup failed on 0.12.2 because `substrate-postgresql` ships its auto-create-schema SQL scripts as classpath resources under `db/substrate/postgresql/V1__create_*.sql` with no native-image hints. Added that glob to `resource-config.json` so the native image carries those SQL files. Caught via local `mvn -Pnative native:compile` + run — the local native binary boots in **~0.25 s** end-to-end (Liquibase runs, substrate creates its session tables, seeder loads 8 teams / 36 services / 86 deps), so the sidecar + native pipeline is healthy once hints are correct.
+
 ## [0.12.2] - 2026-04-20
 
 ### Fixed
@@ -177,7 +183,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.12.2...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.12.3...HEAD
+[0.12.3]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.3
 [0.12.2]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.2
 [0.12.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.1
 [0.12.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.12.0
