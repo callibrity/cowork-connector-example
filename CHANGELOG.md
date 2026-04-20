@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-04-20
+
+### Fixed
+
+- Micrometer Observation → OTel span bridge is now registered at startup. Spring Boot 4 split the tracing autoconfig out of the monolithic actuator module, and pulling in just `micrometer-tracing-bridge-otel` wasn't enough — the library was on the classpath but `MicrometerTracingAutoConfiguration` never activated, so the `DefaultTracingObservationHandler` never registered with the `ObservationRegistry`. Mocapi-o11y's Observations fired on every tool call (attributes correctly set: `mcp.handler.name`, `mcp.handler.kind`, `mcp.session`), metered cleanly into Micrometer, but never produced OTel spans. Switched to the `spring-boot-starter-opentelemetry` meta-starter, which brings the autoconfig + the bridge + the OTel SDK + the OTLP exporter in one dep. Verified at boot via `/actuator/beans`: `defaultTracingObservationHandler`, `micrometerOtelTracer`, and `MicrometerTracingAutoConfiguration` all now register. Tool-call handler spans (named `mcp.tool`) will now show up in Application Insights' `dependencies` table with `mcp.handler.name` in `customDimensions`.
+
 ## [0.10.0] - 2026-04-20
 
 ### Changed
@@ -134,7 +140,8 @@ All notable changes to this project are documented in this file. The format is b
 - JDK 25 (GraalVM 25 required for local native-image builds; Temurin 25 is sufficient for JVM mode).
 - Docker Desktop for building or running native container images.
 
-[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/callibrity/cowork-connector-example/compare/0.10.1...HEAD
+[0.10.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.10.1
 [0.10.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.10.0
 [0.9.0]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.9.0
 [0.8.1]: https://github.com/callibrity/cowork-connector-example/releases/tag/0.8.1
