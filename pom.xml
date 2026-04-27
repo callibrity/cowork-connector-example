@@ -35,7 +35,7 @@
 
     <properties>
         <java.version>25</java.version>
-        <mocapi.version>0.12.1</mocapi.version>
+        <mocapi.version>0.14.0</mocapi.version>
         <substrate.version>0.7.0</substrate.version>
         <jpa-utils.version>0.0.12</jpa-utils.version>
         <opentelemetry-logback-appender.version>2.24.0-alpha</opentelemetry-logback-appender.version>
