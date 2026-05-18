@@ -42,7 +42,7 @@
 
         <!-- Code-quality plugin versions -->
         <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
-        <spotless-maven-plugin.version>3.4.0</spotless-maven-plugin.version>
+        <spotless-maven-plugin.version>3.5.1</spotless-maven-plugin.version>
         <google-java-format.version>1.35.0</google-java-format.version>
         <jacoco.plugin.version>0.8.14</jacoco.plugin.version>
         <sonar.plugin.version>5.5.0.6356</sonar.plugin.version>
